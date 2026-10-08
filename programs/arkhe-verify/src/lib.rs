@@ -1,16 +1,25 @@
 use anchor_lang::prelude::*;
+use anchor_lang::system_program::System;
 
-declare_id!("ArkheVerifyProgramId11111111111111111111111");
+declare_id!("11111111111111111111111111111111");
 
 #[program]
 pub mod arkhe_verify {
     use super::*;
 
-    pub fn anchor_record(_ctx: Context<AnchorRecord>, _record_hash: Vec<u8>, _metadata_uri: String) -> Result<()> {
+    pub fn anchor_record(
+        _ctx: Context<AnchorRecord>,
+        _record_hash: Vec<u8>,
+        _metadata_uri: String,
+    ) -> Result<()> {
         Ok(())
     }
 
-    pub fn verify_inclusion(_ctx: Context<VerifyInclusion>, _record_hash: Vec<u8>, _proof: Vec<u8>) -> Result<()> {
+    pub fn verify_inclusion(
+        _ctx: Context<VerifyInclusion>,
+        _record_hash: Vec<u8>,
+        _proof: Vec<u8>,
+    ) -> Result<()> {
         Ok(())
     }
 
