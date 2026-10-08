@@ -1,0 +1,64 @@
+name: SQLx Migrations Validation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'crates/**/migrations/**'
+      - 'crates/**/src/**/*.rs'
+      - '.github/workflows/sqlx-migrations.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'crates/**/migrations/**'
+      - 'crates/**/src/**/*.rs'
+
+jobs:
+  sqlx-check:
+    name: Validate SQLx Migrations
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: arkhe
+          POSTGRES_PASSWORD: arkhe
+          POSTGRES_DB: arkhe_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://arkhe:arkhe@localhost:5432/arkhe_test
+      SQLX_OFFLINE: "false"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --no-default-features --features postgres,rustls --version 0.7.4
+
+      - name: Run migrations
+        run: |
+          sqlx database create
+          sqlx migrate run --source crates/arkhe-core/migrations
+
+      - name: Verify migration info
+        run: sqlx migrate info --source crates/arkhe-core/migrations
+
+      - name: Check sqlx offline metadata
+        run: cargo sqlx prepare --check --workspace -- --all-targets
+
+      - name: Run tests with database
+        run: cargo test --workspace --all-features

@@ -1,7 +1,6 @@
 [workspace]
+resolver = "2"
 members = [
-    "crates/*",
-    "programs/*",
-    "programs/arkhe-verify",
-    "bridge/*"
+    "crates/arkhe-core",
+    "crates/arkhe-provenance-mcp"
 ]
