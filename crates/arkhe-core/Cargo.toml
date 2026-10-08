@@ -2,3 +2,6 @@
 name = "arkhe-core"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+async_stripe = { version = "0.40", package = "async-stripe", features = ["runtime-tokio-hyper", "webhook-events", "connect"] }
