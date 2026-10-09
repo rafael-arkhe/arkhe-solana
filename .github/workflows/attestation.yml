@@ -1,0 +1,40 @@
+name: Attestation
+
+on: [push, pull_request]
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Run tests (nextest)
+        run: |
+          cargo install cargo-nextest
+          cargo nextest run --workspace --profile ci
+
+      - name: Build ledger from JUnit
+        run: |
+          pip install blake3
+          python scripts/junit_to_report.py \
+            --junit-dir target/nextest/ci \
+            --out arkhe/ledger.json \
+            --report arkhe/report.json
+
+      - name: Build attestation graph
+        run: cargo run -p arkhe-attestation -- graph --strict
+
+      - name: Verify freshness
+        run: cargo run -p arkhe-attestation -- freshness --strict
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestation
+          path: |
+            arkhe/ledger.json
+            arkhe/report.json
+            arkhe/attestation_graph.json
+            arkhe/freshness.json
