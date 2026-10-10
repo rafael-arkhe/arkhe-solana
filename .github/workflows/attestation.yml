@@ -12,12 +12,12 @@ jobs:
 
       - name: Run tests (nextest)
         run: |
-          cargo install cargo-nextest
+          cargo install cargo-nextest --locked
           cargo nextest run --workspace --profile ci
 
       - name: Build ledger from JUnit
         run: |
-          pip install blake3
+          pip install blake3 --break-system-packages
           python scripts/junit_to_report.py \
             --junit-dir target/nextest/ci \
             --out arkhe/ledger.json \
