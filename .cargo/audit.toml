@@ -1,0 +1,17 @@
+[advisories]
+# Ignoring dependencies pulled in by `async-stripe` 0.40.2 (which requires features like `hyper` which pulls `h2`)
+# As per user approval, we are ignoring these for MVP due to `async-stripe` being unupgradable without breaking the `connect` feature.
+# We will track replacing `async-stripe` with a minimalist HTTP client for Stripe in the future.
+# Ensure re-evaluation by 2027-03-31.
+ignore = [
+    # h2 - multiple vulnerabilities (Re-evaluate by 2027-03-31)
+    "RUSTSEC-2026-0258",
+    "RUSTSEC-2026-0174",
+    # instant - unmaintained (Re-evaluate by 2027-03-31)
+    "RUSTSEC-2024-0384",
+    # http-types - multiple vulnerabilities (Re-evaluate by 2027-03-31)
+    "RUSTSEC-2026-0097",
+    # quick-xml - multiple vulnerabilities - we only use this for parsing junit reports which we trust.
+    "RUSTSEC-2026-0194",
+    "RUSTSEC-2026-0195"
+]

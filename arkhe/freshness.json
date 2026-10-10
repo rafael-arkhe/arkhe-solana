@@ -1,0 +1,16 @@
+{
+  "checked_at": "2026-10-10T21:18:36.008209+00:00",
+  "match": true,
+  "reason": "match",
+  "sha_match": true,
+  "blake3_match": true,
+  "report_hash": "79228e5b8b9eb276a590bccbde795006bb83b584cd7cf7256d2d96ff83d1abcc",
+  "current_hash": "79228e5b8b9eb276a590bccbde795006bb83b584cd7cf7256d2d96ff83d1abcc",
+  "report_blake3": null,
+  "current_blake3": null,
+  "diff": {
+    "added": [],
+    "missing": [],
+    "changed": []
+  }
+}

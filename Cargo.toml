@@ -2,5 +2,6 @@
 resolver = "2"
 members = [
     "crates/arkhe-core",
-    "crates/arkhe-provenance-mcp"
+    "crates/arkhe-provenance-mcp",
+    "crates/arkhe-attestation"
 ]

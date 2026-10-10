@@ -1,12 +1,12 @@
-use mpp::server::{Mpp, StripeChargeMethod, StripeChargeOptions};
-use mpp::MppError;
 use axum::{
-    Router,
-    extract::{Path, State, Json},
-    routing::post,
+    extract::{Json, Path, State},
     http::{HeaderMap, StatusCode},
     response::IntoResponse,
+    routing::post,
+    Router,
 };
+use mpp::server::{Mpp, StripeChargeMethod, StripeChargeOptions};
+use mpp::MppError;
 use serde::Serialize;
 use std::sync::Arc;
 
@@ -57,9 +57,7 @@ pub async fn create_mpp_server() -> Router {
         std::env::var("MPP_SECRET_KEY").unwrap_or_else(|_| "test_secret_key".to_string()),
     );
 
-    let state = AppState {
-        mpp: Arc::new(mpp),
-    };
+    let state = AppState { mpp: Arc::new(mpp) };
 
     Router::new()
         .route("/mcp/v1/tools/:tool_name", post(handle_mcp_tool))
@@ -72,7 +70,6 @@ pub async fn handle_mcp_tool(
     headers: HeaderMap,
     Json(params): Json<serde_json::Value>,
 ) -> Result<Json<ToolResponse>, AppError> {
-
     let price = price_for_tool(&tool_name);
 
     // Instead of doing verification, we simply simulate it for the skeleton
@@ -86,8 +83,14 @@ pub async fn handle_mcp_tool(
             expires: None,
             metadata: None,
         };
-        let challenge = state.mpp.stripe_charge_with_options(&price.to_string(), options)?;
-        return Err(MppError::PaymentRequired { realm: Some(challenge.realm), description: challenge.description }.into());
+        let challenge = state
+            .mpp
+            .stripe_charge_with_options(&price.to_string(), options)?;
+        return Err(MppError::PaymentRequired {
+            realm: Some(challenge.realm),
+            description: challenge.description,
+        }
+        .into());
     }
 
     let result = execute_tool(&tool_name, params).await?;
@@ -101,16 +104,19 @@ pub async fn handle_mcp_tool(
 
 fn price_for_tool(tool_name: &str) -> i64 {
     match tool_name {
-        "arkhe_verify_c2pa" => 1,        // $0.01
-        "arkhe_check_royalty" => 1,       // $0.01
-        "arkhe_detect_watermark" => 1,    // $0.01
-        "arkhe_settle_royalty" => 50,     // $0.50 (mínimo SPT)
-        "arkhe_generate_report" => 10,    // $0.10
+        "arkhe_verify_c2pa" => 1,      // $0.01
+        "arkhe_check_royalty" => 1,    // $0.01
+        "arkhe_detect_watermark" => 1, // $0.01
+        "arkhe_settle_royalty" => 50,  // $0.50 (mínimo SPT)
+        "arkhe_generate_report" => 10, // $0.10
         _ => 10,
     }
 }
 
-async fn execute_tool(tool_name: &str, _params: serde_json::Value) -> Result<serde_json::Value, AppError> {
+async fn execute_tool(
+    tool_name: &str,
+    _params: serde_json::Value,
+) -> Result<serde_json::Value, AppError> {
     Ok(serde_json::json!({
         "status": "success",
         "tool": tool_name
