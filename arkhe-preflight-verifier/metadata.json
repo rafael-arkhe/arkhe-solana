@@ -1,0 +1,6 @@
+{
+  "name": "Arkhe Preflight v23 - Provenance Verifier",
+  "description": "Cryptographic audio provenance verifier featuring C2PA manifest verification, Merkle Mountain Range (MMR) inclusion proofs, Solana blockchain anchoring, trust policy binding, and Clopper-Pearson statistical calibration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
