@@ -222,6 +222,14 @@ fn run_freshness(
     }
 
     let match_ = sha_match && b3_match;
+
+    if diff.changed.is_empty() && diff.missing.is_empty() && diff.added.is_empty() && !match_ {
+        eprintln!("AVISO: diff vazio mas hashes diferem. \
+                   Provável causa: caminhos absolutos no hash agregado. \
+                   report_hash={}, current_hash={}",
+            report_sha.unwrap_or("?"), current.sha256);
+    }
+
     let reason = if match_ {
         "match".to_string()
     } else if !diff.missing.is_empty() {

@@ -78,42 +78,41 @@ fn hash_file(path: &Path) -> Result<DualHash> {
 /// Agrega hashes de um conjunto de ficheiros num único DualHash.
 ///
 /// O hash agregado é o SHA-256 (e BLAKE3) do conteúdo concatenado
-/// `path:hash\npath:hash\n...` ordenado por path.
-pub fn aggregate_hash(files: &[PathBuf]) -> Result<DualHash> {
-    let mut hashes = Vec::new();
-    for f in files {
-        let h = hash_file(f)?;
-        hashes.push((f.clone(), h));
-    }
-    Ok(aggregate_from_hashes(&hashes))
-}
-
-/// Versão que aceita um mapa path→DualHash já calculado.
-pub fn aggregate_from_hashes(hashes: &[(PathBuf, DualHash)]) -> DualHash {
+/// `path:hash\npath:hash\n...` ordenado por path relativo.
+pub fn aggregate_hash(files: &[PathBuf], root: &Path) -> Result<DualHash> {
     let mut hasher_sha = Sha256::new();
     let mut hasher_b3 = blake3::Hasher::new();
 
-    for (path, h) in hashes {
-        let line = format!("{}:{}\n", path.display(), h.sha256);
+    // Ordenar por caminho relativo, não pelo absoluto
+    let mut entries: Vec<(String, DualHash)> = Vec::new();
+    for f in files {
+        let h = hash_file(f)?;
+        let rel = f.strip_prefix(root).unwrap_or(f).display().to_string();
+        entries.push((rel, h));
+    }
+    entries.sort_by(|a, b| a.0.cmp(&b.0));
+
+    for (rel, h) in &entries {
+        let line = format!("{}:{}\n", rel, h.sha256);
         hasher_sha.update(line.as_bytes());
         hasher_b3.update(line.as_bytes());
         if let Some(b3) = &h.blake3 {
-            let line_b3 = format!("{}:{}\n", path.display(), b3);
+            let line_b3 = format!("{}:{}\n", rel, b3);
             hasher_sha.update(line_b3.as_bytes());
             hasher_b3.update(line_b3.as_bytes());
         }
     }
 
-    DualHash {
+    Ok(DualHash {
         sha256: hex::encode(hasher_sha.finalize()),
         blake3: Some(hasher_b3.finalize().to_hex().to_string()),
-    }
+    })
 }
 
 /// Atalho: descobre + agrega.
 pub fn compute_source_hashes(root: &Path) -> Result<DualHash> {
     let files = collect_source_files(root);
-    aggregate_hash(&files)
+    aggregate_hash(&files, root)
 }
 
 /// Mapa path→DualHash para comparação per-file.
@@ -135,8 +134,8 @@ mod tests {
 
     #[test]
     fn aggregate_empty_is_deterministic() {
-        let a = aggregate_hash(&[]).unwrap();
-        let b = aggregate_hash(&[]).unwrap();
+        let a = aggregate_hash(&[], Path::new("")).unwrap();
+        let b = aggregate_hash(&[], Path::new("")).unwrap();
         assert_eq!(a.sha256, b.sha256);
         assert_eq!(a.blake3, b.blake3);
     }
@@ -146,10 +145,10 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let f = dir.path().join("a.rs");
         fs::write(&f, "fn main() {}").unwrap();
-        let h1 = aggregate_hash(&[f.clone()]).unwrap();
+        let h1 = aggregate_hash(&[f.clone()], dir.path()).unwrap();
 
         fs::write(&f, "fn main() { println!(); }").unwrap();
-        let h2 = aggregate_hash(&[f.clone()]).unwrap();
+        let h2 = aggregate_hash(&[f.clone()], dir.path()).unwrap();
 
         assert_ne!(h1.sha256, h2.sha256);
         assert_ne!(h1.blake3, h2.blake3);
