@@ -24,13 +24,34 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/api/script/download', (req, res) => {
-  const scriptPath = join(process.cwd(), 'arkhe_preflight_v23.py');
+  const scriptPath = join(process.cwd(), '..', 'scripts', 'arkhe_preflight_v23.py');
   res.download(scriptPath, 'arkhe_preflight_v23.py');
 });
+
+const ALLOWED_RPC_URLS = [
+  'https://api.devnet.solana.com',
+  'https://api.testnet.solana.com',
+  'https://api.mainnet-beta.solana.com',
+];
+
+function isAllowedRpcUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return ALLOWED_RPC_URLS.includes(parsed.origin) || parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
 
 app.post('/api/solana-proxy', async (req, res) => {
   try {
     const { rpcUrl = 'https://api.devnet.solana.com', body } = req.body;
+
+    if (!isAllowedRpcUrl(rpcUrl)) {
+      res.status(403).json({ error: 'RPC URL not allowed' });
+      return;
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -53,6 +74,12 @@ app.post('/api/solana-proxy', async (req, res) => {
 app.get('/api/solana/health', async (req, res) => {
   try {
     const target = (req.query['rpc'] as string) || 'https://api.devnet.solana.com';
+
+    if (!isAllowedRpcUrl(target)) {
+      res.status(403).json({ error: 'RPC URL not allowed' });
+      return;
+    }
+
     const start = Date.now();
     const resp = await fetch(target, {
       method: 'POST',

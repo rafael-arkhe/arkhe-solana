@@ -1,76 +1,277 @@
 {
-  "generated_at": "2026-10-10T21:18:22.075558+00:00",
+  "generated_at": "2026-10-11T16:39:31.227490+00:00",
   "code_hash": {
-    "sha256": "79228e5b8b9eb276a590bccbde795006bb83b584cd7cf7256d2d96ff83d1abcc",
-    "blake3": null
+    "sha256": "5417a09824b34487d591c47cf4e33f387e08941e0919a163d889c2d32405fcde",
+    "blake3": "9d7378a00cd70a12adc9ee27e633e8c03bb7e824eda26432ac70b104dc2bc633"
   },
   "source_hashes": {
-    "Anchor.toml": "ba5b450e5b1ab98ec7e1b4c4fc647fa626d6cbf522bf379a1e6e3e73661af206",
-    "Cargo.lock": "780ff093e13586ee9a4e5ed62979ee977d30b538d0ad410bb3d8e1a0a7b66357",
-    "Cargo.toml": "59340a8f65dca510422313e51c5e17c051af4d7bca9eaeb3ff879fe6565678ea",
-    "crates/arkhe-attestation/src/graph.rs": "716176d6067c6147d7497b6370b258f4de92152c5b027eae43325dc3a186bc9c",
-    "crates/arkhe-attestation/src/hash.rs": "07d231e47a0719bf0a3ad058efe014c491d8613937ca79c9f34fbda2e6bfa429",
-    "crates/arkhe-attestation/src/junit.rs": "eb05232aa2638e768c9b1b601e1efb81badd11c15886469db3750a2fcd96d2f3",
-    "crates/arkhe-attestation/src/lib.rs": "1bde9f6c0ac8ea1a27d7c62fe4560445007c1c0cb3bdfeecd5000a47d8adc8d2",
-    "crates/arkhe-attestation/src/main.rs": "5de6ccd038a0d07259082ebbcf2ceb398f01b169e6f7205fbc6ffb0db3a22a3b",
-    "crates/arkhe-attestation/src/types.rs": "c92614a0600f1a1fbd1caf4c6f0553cff5991d36ef8a5cab2ee1cd2095c3240e",
-    "crates/arkhe-c2pa-bridge/src/anchor.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-c2pa-bridge/src/invariants.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-c2pa-bridge/src/lib.rs": "e6aec3a25b809907f12d76b3af7f1fa2e9258a0f96aa5641a96d4fdc94a0a4e4",
-    "crates/arkhe-c2pa-bridge/src/manifest.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-c2pa-bridge/src/verify.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-core/src/error.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-core/src/hash.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-core/src/lib.rs": "834f4af319a132604991ee855d3800ecc3c01b0015248b0dc7819297fbac0047",
-    "crates/arkhe-core/src/stripe.rs": "b0e05273a2c2e5adebe6bf317517953fb65fd5ec5cc47bf22b5d4f44a66a76ae",
-    "crates/arkhe-core/src/traits/mod.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-core/src/traits/provenance.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-core/src/traits/settlement.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-core/src/types.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-eu-ai-act/src/check.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-eu-ai-act/src/invariants.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-eu-ai-act/src/lib.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-eu-ai-act/src/report.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-light-shed-detect/src/classify.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-light-shed-detect/src/invariants.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-light-shed-detect/src/lib.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-light-shed-detect/src/spectral.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-llm/src/canonical.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-llm/src/envelope.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-llm/src/invariants.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-llm/src/lib.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-llm/src/replay.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-mcp/src/lib.rs": "9752a921a441e64700e9aa9c3c6291ef76fecf8bdc9c6f0f282e4453bbff0372",
-    "crates/arkhe-provenance-mcp/src/mpp.rs": "62b47f30e1a7a5cedb1b492268b9638da9fab7aebdfa7ebf51fa44d2ef535cde",
-    "crates/arkhe-provenance-mcp/src/server.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-mcp/src/tools/ai_act.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-mcp/src/tools/bypass.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-mcp/src/tools/c2pa.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-mcp/src/tools/mod.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-mcp/src/tools/royalty.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-provenance-mcp/src/tools/watermark.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-royalty-verify/src/invariants.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-royalty-verify/src/lib.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-royalty-verify/src/payment.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-royalty-verify/src/settle.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-royalty-verify/src/solana.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-royalty-verify/src/verify.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-watermark-llm/src/config.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-watermark-llm/src/detect.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-watermark-llm/src/embed.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-watermark-llm/src/invariants.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "crates/arkhe-watermark-llm/src/lib.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/errors.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/instructions/anchor_record.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/instructions/mod.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/instructions/settle_royalty.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/instructions/verify_inclusion.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/lib.rs": "1dc70cbb787003ee6123667c111671571f0aabf69ab9b87e5f9b83c6a0a5a370",
-    "programs/arkhe-verify/src/state/mod.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/state/work_record.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/state/wormgraph.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/utils/blake3.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/utils/mmr.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "programs/arkhe-verify/src/utils/mod.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    "Anchor.toml": {
+      "sha256": "ba5b450e5b1ab98ec7e1b4c4fc647fa626d6cbf522bf379a1e6e3e73661af206",
+      "blake3": "e1badfd5931108cf7899abc281b2d5f51c77e9cf85f07a0e605fe28324b55162"
+    },
+    "Cargo.lock": {
+      "sha256": "780ff093e13586ee9a4e5ed62979ee977d30b538d0ad410bb3d8e1a0a7b66357",
+      "blake3": "9ebd6ff8ef19bbea86fe2549b16273b646f682618a2c78b90d22e65bf8159f97"
+    },
+    "Cargo.toml": {
+      "sha256": "59340a8f65dca510422313e51c5e17c051af4d7bca9eaeb3ff879fe6565678ea",
+      "blake3": "7fadc2e84f3fa1c92cc7ddbd06b76ec33476b710151ce82f1fa88a6a09ceb061"
+    },
+    "crates/arkhe-attestation/src/graph.rs": {
+      "sha256": "716176d6067c6147d7497b6370b258f4de92152c5b027eae43325dc3a186bc9c",
+      "blake3": "d963edcc98609c530b680a69c0e04a1e6b85004a3fe5f1ae917f0783de01e150"
+    },
+    "crates/arkhe-attestation/src/hash.rs": {
+      "sha256": "20cc4005472e4ebf0accad7eae031444d3cf37daaa20b62c5d0dbc63297a652e",
+      "blake3": "300811b90e83444d233900878e136b4c7c5c70a634d1f9cfc966720c7daeb182"
+    },
+    "crates/arkhe-attestation/src/junit.rs": {
+      "sha256": "eb05232aa2638e768c9b1b601e1efb81badd11c15886469db3750a2fcd96d2f3",
+      "blake3": "8ec3aa77f5bb84a4e1d3fbabdf804234f94c7b6e5de1a2b91a8dfab0b91b5513"
+    },
+    "crates/arkhe-attestation/src/lib.rs": {
+      "sha256": "1bde9f6c0ac8ea1a27d7c62fe4560445007c1c0cb3bdfeecd5000a47d8adc8d2",
+      "blake3": "41761aca9a7ccf1a6d027efc43bbde26c81e8ea14be49002bec8c63f281b982d"
+    },
+    "crates/arkhe-attestation/src/main.rs": {
+      "sha256": "bbe8eaf2cc039f04bbf619406568290058919e42a7ba9cbdca307beaeb82f22c",
+      "blake3": "abbe4f9021235c51d8d0b58e4d2c2b5ebf7e7ee3023de35192683c080d1a1bcb"
+    },
+    "crates/arkhe-attestation/src/types.rs": {
+      "sha256": "5dd19e9591ac141621bf0838f85af56ebd3835c22cd623846824b203fa0b736f",
+      "blake3": "b72006cda7691247d1b78b1d7c6b2312bcfa145165168e020fbdbdc2bee56d8c"
+    },
+    "crates/arkhe-c2pa-bridge/src/anchor.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-c2pa-bridge/src/invariants.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-c2pa-bridge/src/lib.rs": {
+      "sha256": "e6aec3a25b809907f12d76b3af7f1fa2e9258a0f96aa5641a96d4fdc94a0a4e4",
+      "blake3": "11444caa03194a7c34fbdd251828898212d8f8186b5fd2330a4007f91d5dc073"
+    },
+    "crates/arkhe-c2pa-bridge/src/manifest.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-c2pa-bridge/src/verify.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-core/src/error.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-core/src/hash.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-core/src/lib.rs": {
+      "sha256": "834f4af319a132604991ee855d3800ecc3c01b0015248b0dc7819297fbac0047",
+      "blake3": "6b1333702402535f7fa58b704d808cefe0ec53377510819cd52665a14815e7fe"
+    },
+    "crates/arkhe-core/src/stripe.rs": {
+      "sha256": "b0e05273a2c2e5adebe6bf317517953fb65fd5ec5cc47bf22b5d4f44a66a76ae",
+      "blake3": "8c2658be4875f03abee588c82ca714fbd244d33f4917097b9a56214ded48f345"
+    },
+    "crates/arkhe-core/src/traits/mod.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-core/src/traits/provenance.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-core/src/traits/settlement.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-core/src/types.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-eu-ai-act/src/check.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-eu-ai-act/src/invariants.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-eu-ai-act/src/lib.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-eu-ai-act/src/report.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-light-shed-detect/src/classify.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-light-shed-detect/src/invariants.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-light-shed-detect/src/lib.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-light-shed-detect/src/spectral.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-llm/src/canonical.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-llm/src/envelope.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-llm/src/invariants.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-llm/src/lib.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-llm/src/replay.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-mcp/src/lib.rs": {
+      "sha256": "9752a921a441e64700e9aa9c3c6291ef76fecf8bdc9c6f0f282e4453bbff0372",
+      "blake3": "0bfa757aeeb68fdfdfe518cd4c4f3118d462787deaf4d69999d871b6998da203"
+    },
+    "crates/arkhe-provenance-mcp/src/mpp.rs": {
+      "sha256": "62b47f30e1a7a5cedb1b492268b9638da9fab7aebdfa7ebf51fa44d2ef535cde",
+      "blake3": "221986602f84710475815a792d60ff3bf9842b4ac2aeaff470f87ba5ba1de9b4"
+    },
+    "crates/arkhe-provenance-mcp/src/server.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-mcp/src/tools/ai_act.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-mcp/src/tools/bypass.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-mcp/src/tools/c2pa.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-mcp/src/tools/mod.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-mcp/src/tools/royalty.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-provenance-mcp/src/tools/watermark.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-royalty-verify/src/invariants.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-royalty-verify/src/lib.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-royalty-verify/src/payment.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-royalty-verify/src/settle.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-royalty-verify/src/solana.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-royalty-verify/src/verify.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-watermark-llm/src/config.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-watermark-llm/src/detect.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-watermark-llm/src/embed.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-watermark-llm/src/invariants.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "crates/arkhe-watermark-llm/src/lib.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/errors.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/instructions/anchor_record.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/instructions/mod.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/instructions/settle_royalty.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/instructions/verify_inclusion.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/lib.rs": {
+      "sha256": "1dc70cbb787003ee6123667c111671571f0aabf69ab9b87e5f9b83c6a0a5a370",
+      "blake3": "74e9aa8c1b091f56301749a93713461ee2b5afc987dff5347184d4a0235430e8"
+    },
+    "programs/arkhe-verify/src/state/mod.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/state/work_record.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/state/wormgraph.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/utils/blake3.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/utils/mmr.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    },
+    "programs/arkhe-verify/src/utils/mod.rs": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    }
   }
 }
