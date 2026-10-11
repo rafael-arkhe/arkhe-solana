@@ -59,12 +59,17 @@ fn main() -> Result<()> {
             out,
             strict,
         } => {
+            #[derive(serde::Deserialize)]
+            struct LedgerWrapper {
+                claims: BTreeMap<String, Claim>,
+            }
+
             let raw = std::fs::read_to_string(&ledger)
                 .with_context(|| format!("ledger não encontrado: {}", ledger.display()))?;
-            let claims: BTreeMap<String, Claim> =
+            let wrapper: LedgerWrapper =
                 serde_json::from_str(&raw).context("ledger JSON inválido")?;
 
-            let graph = build_graph(&claims);
+            let graph = build_graph(&wrapper.claims);
             if let Some(parent) = out.parent() {
                 std::fs::create_dir_all(parent).ok();
             }

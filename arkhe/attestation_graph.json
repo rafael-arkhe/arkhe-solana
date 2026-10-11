@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-10-11T00:08:11.816539669+00:00",
+  "nodes": [
+    {
+      "id": "graph::tests::bfs_depth_is_real_distance",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "graph::tests::cycles_detected",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "graph::tests::severity_by_depth",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "hash::tests::aggregate_changes_with_content",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "hash::tests::aggregate_empty_is_deterministic",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    }
+  ],
+  "edges": [],
+  "cycles": [],
+  "propagated_compromised": [],
+  "max_depth": 0
+}

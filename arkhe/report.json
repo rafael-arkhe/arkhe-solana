@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-10T21:18:22.075558+00:00",
+  "generated_at": "2026-10-11T00:08:52.880591+00:00",
   "code_hash": {
-    "sha256": "79228e5b8b9eb276a590bccbde795006bb83b584cd7cf7256d2d96ff83d1abcc",
+    "sha256": "9b5913034c4199445c2c49d8eb88fc6884da500b11e3ea5cbf2125e3d4ec6fc1",
     "blake3": null
   },
   "source_hashes": {
@@ -12,7 +12,7 @@
     "crates/arkhe-attestation/src/hash.rs": "07d231e47a0719bf0a3ad058efe014c491d8613937ca79c9f34fbda2e6bfa429",
     "crates/arkhe-attestation/src/junit.rs": "eb05232aa2638e768c9b1b601e1efb81badd11c15886469db3750a2fcd96d2f3",
     "crates/arkhe-attestation/src/lib.rs": "1bde9f6c0ac8ea1a27d7c62fe4560445007c1c0cb3bdfeecd5000a47d8adc8d2",
-    "crates/arkhe-attestation/src/main.rs": "5de6ccd038a0d07259082ebbcf2ceb398f01b169e6f7205fbc6ffb0db3a22a3b",
+    "crates/arkhe-attestation/src/main.rs": "f178e3f25ca73ad9756e4fe82af426b14dfa883ed0d0d7356e3f4da1c2f62986",
     "crates/arkhe-attestation/src/types.rs": "c92614a0600f1a1fbd1caf4c6f0553cff5991d36ef8a5cab2ee1cd2095c3240e",
     "crates/arkhe-c2pa-bridge/src/anchor.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "crates/arkhe-c2pa-bridge/src/invariants.rs": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
