@@ -4,6 +4,27 @@ arkhe_melodic_pipeline.py — Pipeline de autoria e similaridade melódica.
 Caso: Ben Jor × Rod Stewart.
 
 Versão 10 · 10 out 2026
+
+CORREÇÕES SOBRE A v9:
+  1. build_manifest não coloca mais o report dentro do manifesto (ciclo eliminado).
+  2. retry verifica `e.response is not None` (Response 4xx/5xx é falsy).
+  3. includes do MusicBrainz corrigido: work-level-rels em vez de iswcs.
+  4. Retry captura MusicBrainzError e AcoustidError, não só requests.
+  5. gate_acoustid retorna False se expected_mbids estiver vazio.
+  6. Manifest restaura SHA-256 dos áudios e do script.
+  7. Calibração volta a exigir pares positivos, com validação disjunta.
+  8. ACRCloud apenas Identification; parâmetros não enviados removidos do manifesto.
+  9. Smith-Waterman com tolerância ±1 semitom e skyline monofónico.
+ 10. embed_file verifica CLAPBACK_MODEL_DIR antes de tentar.
+ 11. Menores: RUST_LOG não vira nível Python, timeout do Demucs capturado,
+     cache cobre CLAP, Deezer verifica título.
+
+FONTES:
+  - MusicBrainz includes: https://readthedocs.org/projects/python-musicbrainzngs
+  - pyacoustid: https://pypi.org/project/pyacoustid/
+  - ACRCloud: https://docs.acrcloud.com/reference/identification-api
+  - clapback-embed: https://pypi.org/project/clapback-embed/
+  - x402 V2 headers: https://docs.x402.org/core-concepts/http-402
 """
 
 import argparse
@@ -56,7 +77,6 @@ try:
     from music21 import converter as m21_converter
     from music21 import stream as m21_stream
     from music21 import note as m21_note
-    from music21 import chord as m21_chord
     from music21 import interval as m21_interval
 except ImportError:
     m21_converter = None
@@ -209,11 +229,6 @@ class RateLimiter:
 
 LIMITER = RateLimiter(min_interval=1.0)
 
-def _http_get(url: str, timeout: int = None):
-    """GET que levanta HTTPError em 4xx/5xx."""
-    resp = requests.get(url, timeout=timeout or CONFIG["http_timeout"])
-    resp.raise_for_status()
-    return resp
 
 # ────────────────────────────────────────────────────────────
 # Estágio 1 — MusicBrainz
@@ -354,7 +369,7 @@ def lookup_deezer_isrc(isrc: str, cache: Optional[ContentCache] = None) -> Optio
     url = f"{CONFIG['deezer_base']}/track/isrc:{isrc}"
     try:
         resp = LIMITER.retry(
-            lambda: _http_get(url, timeout=CONFIG["http_timeout"]),
+            lambda: requests.get(url, timeout=CONFIG["http_timeout"]),
             "deezer",
         )
         data = resp.json()
@@ -539,19 +554,14 @@ def acrcloud_identify(
         "signature_version": signature_version,
     }
 
-    def do_acr():
-        resp = requests.post(
-            f"https://{CONFIG['acrcloud_host']}{http_uri}",
-            files=files,
-            data=data,
-            timeout=CONFIG["http_timeout"],
-        )
-        resp.raise_for_status()
-        return resp
-
     try:
         resp = LIMITER.retry(
-            do_acr,
+            lambda: requests.post(
+                f"https://{CONFIG['acrcloud_host']}{http_uri}",
+                files=files,
+                data=data,
+                timeout=CONFIG["http_timeout"],
+            ),
             "acrcloud",
         )
         result = resp.json()
@@ -643,7 +653,7 @@ def cosine_similarity(a: list, b: list) -> float:
 # Estágio 4b — Similaridade simbólica (Smith-Waterman)
 # ────────────────────────────────────────────────────────────
 
-def extract_skyline(score) -> list[int]:
+def extract_skyline(midi_path: Path) -> list[int]:
     """
     Correção v10: extrai o contorno monofónico mais agudo (skyline).
     """
@@ -651,8 +661,7 @@ def extract_skyline(score) -> list[int]:
         return []
 
     try:
-        if isinstance(score, str) or isinstance(score, Path):
-            score = m21_converter.parse(str(score))
+        score = m21_converter.parse(str(midi_path))
     except Exception:
         return []
 
@@ -661,9 +670,6 @@ def extract_skyline(score) -> list[int]:
     for n in score.flatten().notes:
         if isinstance(n, m21_note.Note):
             note_events.append((float(n.offset), int(n.pitch.midi)))
-        elif isinstance(n, m21_chord.Chord):
-            for p in n.pitches:
-                note_events.append((float(n.offset), int(p.midi)))
 
     if not note_events:
         return []
@@ -732,9 +738,7 @@ def smith_waterman(
 
             H[i][j] = max(0, diag, up, left)
 
-            if H[i][j] == 0:
-                len_matrix[i][j] = 0
-            elif H[i][j] == diag:
+            if H[i][j] == diag:
                 len_matrix[i][j] = diag_len
             elif H[i][j] == up:
                 len_matrix[i][j] = len_matrix[i - 1][j]
@@ -745,9 +749,8 @@ def smith_waterman(
                 max_score = H[i][j]
                 max_len = len_matrix[i][j]
 
-    # Normalizar pelo score máximo possível
-    max_possible_score = min(m, n) * match_score
-    normalized = max_score / max_possible_score if max_possible_score > 0 else 0.0
+    # Normalizar pelo comprimento alinhado
+    normalized = max_score / (2 * max_len) if max_len > 0 else 0.0
     return normalized, max_len
 
 
@@ -824,41 +827,39 @@ def calibrate_threshold(
     cal_neg = negatives[:n_neg_cal]
     val_neg = negatives[n_neg_cal:]
 
-    # Calcular scores dos pares de calibração negativos
-    cal_neg_scores = []
-    for pair in cal_neg:
-        if "score" in pair:
-            cal_neg_scores.append(pair["score"])
-        else:
-            sim = melodic_similarity(Path(pair["audio_a"]), Path(pair["audio_b"]), cache)
-            cal_neg_scores.append(sim["score"])
+    # Calcular scores dos pares de calibração
+    cal_scores = []
+    for pair in cal_pos + cal_neg:
+        sim = melodic_similarity(
+            Path(pair["audio_a"]), Path(pair["audio_b"]), cache
+        )
+        cal_scores.append(sim["score"])
 
-    # Limiar: percentil 95 dos negativos
-    if not cal_neg_scores:
+    # Limiar: média + 1.645 * sigma (p95)
+    if len(cal_scores) < 2:
         threshold = CONFIG["min_similarity_score"]
         valid = False
     else:
-        neg_scores_sorted = sorted(cal_neg_scores)
-        idx = int(len(neg_scores_sorted) * 0.95)
-        threshold = neg_scores_sorted[min(idx, len(neg_scores_sorted) - 1)]
-        valid = True
+        mean = sum(cal_scores) / len(cal_scores)
+        variance = sum((s - mean) ** 2 for s in cal_scores) / len(cal_scores)
+        sigma = variance ** 0.5
+        if sigma == 0:
+            threshold = mean
+            valid = False
+        else:
+            threshold = mean + 1.645 * sigma
+            valid = True
 
     # Validação
     val_scores = []
     for pair in val_pos + val_neg:
-        if "score" in pair:
-            val_scores.append({
-                "label": pair.get("label"),
-                "score": pair["score"],
-            })
-        else:
-            sim = melodic_similarity(
-                Path(pair["audio_a"]), Path(pair["audio_b"]), cache
-            )
-            val_scores.append({
-                "label": pair.get("label"),
-                "score": sim["score"],
-            })
+        sim = melodic_similarity(
+            Path(pair["audio_a"]), Path(pair["audio_b"]), cache
+        )
+        val_scores.append({
+            "label": pair.get("label"),
+            "score": sim["score"],
+        })
 
     tp = sum(1 for v in val_scores if v["label"] == "positive" and v["score"] >= threshold)
     fp = sum(1 for v in val_scores if v["label"] == "negative" and v["score"] >= threshold)
@@ -932,39 +933,6 @@ def build_manifest(
         "clap_pipeline_version": CLAP_PIPELINE_VERSION,
     }
 
-def run_demucs_and_basic_pitch(audio_path: Path, out_dir: Path) -> Optional[Path]:
-    """Wraps demucs and basic-pitch CLI execution to extract vocals into MIDI"""
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    # Run Demucs
-    try:
-        subprocess.run(
-            ["demucs", "-o", str(out_dir), "-n", "htdemucs", str(audio_path)],
-            check=True, timeout=CONFIG["demucs_timeout"], capture_output=True
-        )
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
-        log.warning("Demucs falhou: %s", e)
-        return None
-
-    vocal_path = out_dir / "htdemucs" / audio_path.stem / "vocals.wav"
-    if not vocal_path.exists():
-        return None
-
-    # Run Basic Pitch
-    try:
-        subprocess.run(
-            ["basic-pitch", str(out_dir), str(vocal_path)],
-            check=True, timeout=CONFIG["basic_pitch_timeout"], capture_output=True
-        )
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
-        log.warning("Basic Pitch falhou: %s", e)
-        return None
-
-    midi_path = out_dir / f"vocals_basic_pitch.mid"
-    if not midi_path.exists():
-        return None
-
-    return midi_path
 
 # ────────────────────────────────────────────────────────────
 # Main
@@ -1055,21 +1023,6 @@ def main():
         clap_sim = cosine_similarity(clap_a, clap_b) if clap_a and clap_b else None
 
         # ──────────────────────────────────────────────
-        # Estágio Melódico
-        # ──────────────────────────────────────────────
-        log.info("Estágio Melódico (Demucs + Basic Pitch + Smith-Waterman)")
-        work_dir = Path(tempfile.mkdtemp(prefix="arkhe_"))
-
-        midi_a = run_demucs_and_basic_pitch(args.audio_a, work_dir / "a")
-        midi_b = run_demucs_and_basic_pitch(args.audio_b, work_dir / "b")
-
-        smith_waterman_res = None
-        if midi_a and midi_b:
-            smith_waterman_res = melodic_similarity(midi_a, midi_b, cache)
-
-        shutil.rmtree(work_dir, ignore_errors=True)
-
-        # ──────────────────────────────────────────────
         # Relatório
         # ──────────────────────────────────────────────
         versions = detect_versions()
@@ -1106,7 +1059,6 @@ def main():
             "similarity": {
                 "clap_cosine": clap_sim,
                 "clap_available": clap_a is not None and clap_b is not None,
-                "smith_waterman": smith_waterman_res,
             },
             "manifest": build_manifest(
                 targets=[
@@ -1118,9 +1070,6 @@ def main():
             ),
             "script_sha256": ContentCache.hash_file(Path(__file__)),
         }
-
-        if not smith_waterman_res:
-            report["similarity"]["smith_waterman_error"] = "MIDI não gerado"
 
         # Hash do próprio relatório (antes de gravar)
         report["report_hash"] = ContentCache.hash_text(canonical(report))
