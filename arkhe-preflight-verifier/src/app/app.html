@@ -1,0 +1,1902 @@
+<div class="min-h-screen bg-[#090d16] text-slate-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200 font-sans">
+  <!-- Toast notification -->
+  @if (copyNotification()) {
+    <div class="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-slate-900/95 border border-cyan-500/50 text-cyan-200 text-sm px-4 py-2.5 rounded-xl shadow-2xl backdrop-blur-md transition-all">
+      <mat-icon class="text-cyan-400 text-lg">check_circle</mat-icon>
+      <span>{{ copyNotification() }}</span>
+    </div>
+  }
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 via-slate-800 to-indigo-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-inner">
+          <mat-icon class="text-2xl">verified_user</mat-icon>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold tracking-tight text-white text-base">Arkhe Preflight Studio</span>
+            <span class="text-xs font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2 py-0.5 rounded">v21 · 11 out 2026</span>
+          </div>
+          <p class="text-xs text-slate-400">Verificador Criptográfico de Proveniência Musical · C2PA · MMR · Solana</p>
+        </div>
+      </div>
+
+      <!-- Controls bar in header -->
+      <div class="flex flex-wrap items-center gap-2.5 text-xs">
+        <!-- Mode switcher -->
+        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+          <button
+            type="button"
+            (click)="setMode('release')"
+            class="px-3 py-1.5 rounded-md font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+            [class.bg-cyan-500]="mode() === 'release'"
+            [class.text-slate-950]="mode() === 'release'"
+            [class.font-semibold]="mode() === 'release'"
+            [class.text-slate-400]="mode() !== 'release'"
+            [class.hover:text-slate-200]="mode() !== 'release'">
+            <mat-icon class="text-sm">verified</mat-icon>
+            RELEASE
+          </button>
+          <button
+            type="button"
+            (click)="setMode('sanity')"
+            class="px-3 py-1.5 rounded-md font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+            [class.bg-slate-700]="mode() === 'sanity'"
+            [class.text-white]="mode() === 'sanity'"
+            [class.font-semibold]="mode() === 'sanity'"
+            [class.text-slate-400]="mode() !== 'sanity'"
+            [class.hover:text-slate-200]="mode() !== 'sanity'">
+            <mat-icon class="text-sm">flaky</mat-icon>
+            SANITY
+          </button>
+        </div>
+
+        <!-- External Requirement for Trust Policy (--require-trust-policy) -->
+        <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5" title="Restrição externa (--require-trust-policy)">
+          <span class="text-[10px] text-slate-400 px-2 font-mono">--require:</span>
+          <button
+            type="button"
+            (click)="setRequireTrustPolicy('none')"
+            class="px-2 py-1 rounded text-[11px] transition-colors cursor-pointer"
+            [class.bg-slate-700]="requireTrustPolicy() === 'none'"
+            [class.text-white]="requireTrustPolicy() === 'none'"
+            [class.text-slate-400]="requireTrustPolicy() !== 'none'">
+            Livre (None)
+          </button>
+          <button
+            type="button"
+            (click)="setRequireTrustPolicy('signer_trusted')"
+            class="px-2 py-1 rounded text-[11px] transition-colors cursor-pointer"
+            [class.bg-indigo-600]="requireTrustPolicy() === 'signer_trusted'"
+            [class.text-white]="requireTrustPolicy() === 'signer_trusted'"
+            [class.text-slate-400]="requireTrustPolicy() !== 'signer_trusted'">
+            signer_trusted
+          </button>
+          <button
+            type="button"
+            (click)="setRequireTrustPolicy('integrity_only')"
+            class="px-2 py-1 rounded text-[11px] transition-colors cursor-pointer"
+            [class.bg-slate-700]="requireTrustPolicy() === 'integrity_only'"
+            [class.text-white]="requireTrustPolicy() === 'integrity_only'"
+            [class.text-slate-400]="requireTrustPolicy() !== 'integrity_only'">
+            integrity_only
+          </button>
+        </div>
+
+        <!-- Online toggle -->
+        <button
+          type="button"
+          (click)="toggleOnline()"
+          class="px-2.5 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer"
+          [class.bg-emerald-950]="online()"
+          [class.border-emerald-700]="online()"
+          [class.text-emerald-300]="online()"
+          [class.bg-slate-900]="!online()"
+          [class.border-slate-800]="!online()"
+          [class.text-slate-400]="!online()">
+          <mat-icon class="text-sm">{{ online() ? 'wifi' : 'wifi_off' }}</mat-icon>
+          <span>{{ online() ? 'Solana Online' : 'Offline' }}</span>
+        </button>
+
+        <!-- Run check button -->
+        <button
+          type="button"
+          (click)="executeVerification()"
+          class="px-3.5 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold transition-all shadow-md hover:shadow-cyan-500/20 flex items-center gap-1.5 cursor-pointer">
+          <mat-icon class="text-sm" [class.animate-spin]="isVerifying()">refresh</mat-icon>
+          <span>Verificar</span>
+        </button>
+
+        <!-- Download python script -->
+        <button
+          type="button"
+          (click)="downloadPythonScript()"
+          class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 transition-colors flex items-center gap-1 cursor-pointer"
+          title="Descarregar arkhe_preflight_v21.py original">
+          <mat-icon class="text-sm">download</mat-icon>
+          <span>Script Python v21</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation tabs bar -->
+    <div class="border-t border-slate-800/60 bg-slate-950/40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 flex overflow-x-auto no-scrollbar gap-1 text-xs">
+        <button
+          type="button"
+          (click)="setTab('cockpit')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'cockpit'"
+          [class.text-cyan-400]="activeTab() === 'cockpit'"
+          [class.border-transparent]="activeTab() !== 'cockpit'"
+          [class.text-slate-400]="activeTab() !== 'cockpit'"
+          [class.hover:text-slate-200]="activeTab() !== 'cockpit'">
+          <mat-icon class="text-base">dashboard</mat-icon>
+          <span>Cockpit Geral</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('audio')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'audio'"
+          [class.text-cyan-400]="activeTab() === 'audio'"
+          [class.border-transparent]="activeTab() !== 'audio'"
+          [class.text-slate-400]="activeTab() !== 'audio'"
+          [class.hover:text-slate-200]="activeTab() !== 'audio'">
+          <mat-icon class="text-base">graphic_eq</mat-icon>
+          <span>Laboratório de Áudio</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('matrix')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'matrix'"
+          [class.text-cyan-400]="activeTab() === 'matrix'"
+          [class.border-transparent]="activeTab() !== 'matrix'"
+          [class.text-slate-400]="activeTab() !== 'matrix'"
+          [class.hover:text-slate-200]="activeTab() !== 'matrix'">
+          <mat-icon class="text-base">checklist</mat-icon>
+          <span>Matriz I1–I15b</span>
+          <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">{{ passCount() }}/{{ filteredChecks().length }}</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('mmr')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'mmr'"
+          [class.text-cyan-400]="activeTab() === 'mmr'"
+          [class.border-transparent]="activeTab() !== 'mmr'"
+          [class.text-slate-400]="activeTab() !== 'mmr'"
+          [class.hover:text-slate-200]="activeTab() !== 'mmr'">
+          <mat-icon class="text-base">terrain</mat-icon>
+          <span>Árvore & MMR</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('c2pa')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'c2pa'"
+          [class.text-cyan-400]="activeTab() === 'c2pa'"
+          [class.border-transparent]="activeTab() !== 'c2pa'"
+          [class.text-slate-400]="activeTab() !== 'c2pa'"
+          [class.hover:text-slate-200]="activeTab() !== 'c2pa'">
+          <mat-icon class="text-base">fingerprint</mat-icon>
+          <span>Manifesto C2PA (P0-1)</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('solana')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'solana'"
+          [class.text-cyan-400]="activeTab() === 'solana'"
+          [class.border-transparent]="activeTab() !== 'solana'"
+          [class.text-slate-400]="activeTab() !== 'solana'"
+          [class.hover:text-slate-200]="activeTab() !== 'solana'">
+          <mat-icon class="text-base">token</mat-icon>
+          <span>Ancoragem Solana</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('calibration')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'calibration'"
+          [class.text-cyan-400]="activeTab() === 'calibration'"
+          [class.border-transparent]="activeTab() !== 'calibration'"
+          [class.text-slate-400]="activeTab() !== 'calibration'"
+          [class.hover:text-slate-200]="activeTab() !== 'calibration'">
+          <mat-icon class="text-base">query_stats</mat-icon>
+          <span>Calibração & Clopper-Pearson</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('selftest')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'selftest'"
+          [class.text-cyan-400]="activeTab() === 'selftest'"
+          [class.border-transparent]="activeTab() !== 'selftest'"
+          [class.text-slate-400]="activeTab() !== 'selftest'"
+          [class.hover:text-slate-200]="activeTab() !== 'selftest'">
+          <mat-icon class="text-base">science</mat-icon>
+          <span>Vetores Dourados</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTab('editor')"
+          class="px-3.5 py-2.5 border-b-2 font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
+          [class.border-cyan-400]="activeTab() === 'editor'"
+          [class.text-cyan-400]="activeTab() === 'editor'"
+          [class.border-transparent]="activeTab() !== 'editor'"
+          [class.text-slate-400]="activeTab() !== 'editor'"
+          [class.hover:text-slate-200]="activeTab() !== 'editor'">
+          <mat-icon class="text-base">terminal</mat-icon>
+          <span>Estúdio JSON & CLI</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: COCKPIT GERAL                       -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'cockpit') {
+      <div class="space-y-6">
+        <!-- Status Banner -->
+        @if (verificationReport(); as rep) {
+          <div
+            class="rounded-2xl p-6 border transition-all"
+            [class.bg-emerald-950/20]="rep.overallStatus === 'PASS'"
+            [class.border-emerald-500/40]="rep.overallStatus === 'PASS'"
+            [class.bg-rose-950/20]="rep.overallStatus === 'FAIL'"
+            [class.border-rose-500/40]="rep.overallStatus === 'FAIL'">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <div
+                  class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg"
+                  [class.bg-emerald-500/20]="rep.overallStatus === 'PASS'"
+                  [class.text-emerald-400]="rep.overallStatus === 'PASS'"
+                  [class.border]="true"
+                  [class.border-emerald-500/30]="rep.overallStatus === 'PASS'"
+                  [class.bg-rose-500/20]="rep.overallStatus === 'FAIL'"
+                  [class.text-rose-400]="rep.overallStatus === 'FAIL'"
+                  [class.border-rose-500/30]="rep.overallStatus === 'FAIL'">
+                  <mat-icon class="text-3xl">{{ rep.overallStatus === 'PASS' ? 'verified' : 'gpp_bad' }}</mat-icon>
+                </div>
+                <div>
+                  <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold tracking-tight text-white">
+                      {{ rep.overallStatus === 'PASS' ? 'Aprovado para Release' : 'Verificação Reprovada' }}
+                    </h2>
+                    <span
+                      class="text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full uppercase"
+                      [class.bg-emerald-500/20]="rep.overallStatus === 'PASS'"
+                      [class.text-emerald-300]="rep.overallStatus === 'PASS'"
+                      [class.bg-rose-500/20]="rep.overallStatus === 'FAIL'"
+                      [class.text-rose-300]="rep.overallStatus === 'FAIL'">
+                      {{ rep.overallStatus }} ({{ rep.mode }})
+                    </span>
+                  </div>
+                  <p class="text-sm text-slate-300 mt-1">
+                    @if (rep.overallStatus === 'PASS') {
+                      Todos os contratos criptográficos, integridade de áudio, inclusão MMR e ancoragem foram validados com sucesso em {{ rep.executionTimeMs.toFixed(2) }} ms.
+                    } @else {
+                      {{ rep.hardFailures.length }} falha(s) impeditiva(s) encontrada(s) no ledger de proveniência em {{ rep.executionTimeMs.toFixed(2) }} ms.
+                    }
+                  </p>
+                </div>
+              </div>
+
+              <!-- Quick action in banner -->
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  (click)="copyCliText()"
+                  class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer">
+                  <mat-icon class="text-sm">content_copy</mat-icon>
+                  <span>Copiar Saída CLI</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="downloadLedgerJson()"
+                  class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer">
+                  <mat-icon class="text-sm">code</mat-icon>
+                  <span>Exportar JSON</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Issues list if failed -->
+            @if (rep.overallStatus === 'FAIL') {
+              <div class="mt-5 pt-4 border-t border-rose-500/20 space-y-2">
+                <div class="text-xs font-semibold text-rose-300 flex items-center gap-1.5">
+                  <mat-icon class="text-sm">error_outline</mat-icon>
+                  <span>Motivos de Reprovação (Falhas Duras):</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  @for (hf of rep.hardFailures; track hf.id) {
+                    <div class="bg-rose-950/40 border border-rose-800/40 rounded-xl p-3 text-xs">
+                      <div class="flex items-center justify-between text-rose-200 font-mono font-medium">
+                        <span>{{ hf.id }} · {{ hf.name }}</span>
+                        <span class="text-[10px] uppercase bg-rose-900/60 px-1.5 py-0.5 rounded text-rose-300">Falha</span>
+                      </div>
+                      <p class="text-slate-300 mt-1 text-[11px] font-mono break-all">{{ hf.detail }}</p>
+                    </div>
+                  }
+                </div>
+                @if (rep.releaseIssues.length > 0) {
+                  <div class="mt-3 text-xs text-amber-300 flex items-center gap-1 font-mono">
+                    <mat-icon class="text-sm">lock</mat-icon>
+                    <span>Portões de Release: {{ rep.releaseIssues.join('; ') }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Interactive Scenario Chooser -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                <mat-icon class="text-cyan-400 text-lg">science</mat-icon>
+                <span>Cenários de Teste Interativos (1-Clique)</span>
+              </h3>
+              <p class="text-xs text-slate-400">Selecione cenários canônicos de aprovação e ataques maliciosos para verificar as defesas criptográficas da v21.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            @for (scn of scenarios(); track scn.id) {
+              <button
+                type="button"
+                (click)="selectScenario(scn.id)"
+                class="text-left p-3.5 rounded-xl border transition-all cursor-pointer relative"
+                [class.bg-cyan-950/20]="selectedScenarioId() === scn.id"
+                [class.border-cyan-500/50]="selectedScenarioId() === scn.id"
+                [class.bg-slate-950/40]="selectedScenarioId() !== scn.id"
+                [class.border-slate-800]="selectedScenarioId() !== scn.id"
+                [class.hover:border-slate-700]="selectedScenarioId() !== scn.id">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-xs text-white">{{ scn.name }}</span>
+                  <span
+                    class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded"
+                    [class.bg-emerald-950]="scn.expectedStatus === 'PASS'"
+                    [class.text-emerald-300]="scn.expectedStatus === 'PASS'"
+                    [class.border]="true"
+                    [class.border-emerald-800]="scn.expectedStatus === 'PASS'"
+                    [class.bg-rose-950]="scn.expectedStatus === 'FAIL'"
+                    [class.text-rose-300]="scn.expectedStatus === 'FAIL'"
+                    [class.border-rose-800]="scn.expectedStatus === 'FAIL'">
+                    {{ scn.expectedStatus }}
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">{{ scn.description }}</p>
+                @if (scn.expectedIssue) {
+                  <span class="inline-block mt-2 text-[10px] font-mono text-amber-400 bg-amber-950/40 border border-amber-900/60 px-1.5 py-0.5 rounded">
+                    Dispara: {{ scn.expectedIssue }}
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- 3-Column Metric Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Card 1: Check Matrix -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span>Total de Verificações</span>
+              <mat-icon class="text-cyan-400 text-sm">fact_check</mat-icon>
+            </div>
+            <div class="text-2xl font-bold text-white">{{ filteredChecks().length }}</div>
+            <div class="flex items-center gap-2 mt-2 text-[11px] text-slate-400 font-mono">
+              <span class="text-emerald-400">✓ {{ passCount() }} pass</span>
+              <span class="text-rose-400">✗ {{ failCount() }} fail</span>
+              <span class="text-amber-400">⚠ {{ warnCount() }} warn</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Merkle Mountain Range -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span>Merkle Mountain Range</span>
+              <mat-icon class="text-indigo-400 text-sm">terrain</mat-icon>
+            </div>
+            <div class="text-2xl font-bold text-white">
+              {{ currentLedger().anchor?.leaf_count || 0 }} <span class="text-xs text-slate-400 font-normal">folhas</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-2 font-mono truncate">
+              Raiz: {{ (currentLedger().anchor?.mmr_root || '—').slice(0, 16) }}…
+            </div>
+          </div>
+
+          <!-- Card 3: Trust Policy & C2PA -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span>Política de Confiança</span>
+              <mat-icon class="text-purple-400 text-sm">policy</mat-icon>
+            </div>
+            <div class="text-lg font-bold text-white truncate font-mono">
+              {{ currentLedger().trust_policy }}
+            </div>
+            <div class="text-[11px] text-slate-400 mt-2 flex items-center justify-between">
+              <span>Alvo A: {{ c2paAVerified().trust }}</span>
+              <button
+                type="button"
+                (click)="toggleArtifactTrustPolicy()"
+                class="text-[10px] text-cyan-400 hover:underline cursor-pointer">
+                Alternar
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 4: Solana Ancoragem -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span>Ancoragem Blockchain</span>
+              <mat-icon class="text-emerald-400 text-sm">link</mat-icon>
+            </div>
+            <div class="text-lg font-bold text-white truncate font-mono">
+              {{ currentLedger().anchor?.tx_signature ? (currentLedger().anchor?.tx_signature || '').slice(0, 10) + '…' : 'Sem Ancoragem' }}
+            </div>
+            <div class="text-[11px] text-slate-400 mt-2">
+              Drift: &lt; 48h (Tolerância I6)
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Audio Previews in Cockpit -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+              <mat-icon class="text-cyan-400 text-lg">audiotrack</mat-icon>
+              <span>Faixas de Áudio do Artefacto</span>
+            </h3>
+            <button
+              type="button"
+              (click)="setTab('audio')"
+              class="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer">
+              <span>Abrir Laboratório Completo</span>
+              <mat-icon class="text-xs">arrow_forward</mat-icon>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Audio A Mini -->
+            <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-cyan-400">Alvo A (Obra Original)</span>
+                  <span class="text-[10px] font-mono text-slate-400">{{ audioASizeKb() }} KB · 44.1kHz</span>
+                </div>
+                <div class="text-sm font-medium text-white mt-1">{{ currentLedger().target_a.title }}</div>
+                <div class="text-xs text-slate-400">{{ currentLedger().target_a.artist }} ({{ currentLedger().target_a.year }})</div>
+                <div class="mt-2 text-[10px] font-mono text-slate-500 truncate">
+                  SHA-256: {{ audioAComputedSha() }}
+                </div>
+              </div>
+              <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-800/60">
+                <button
+                  type="button"
+                  (click)="playAudio('A')"
+                  class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-medium flex items-center gap-1 cursor-pointer">
+                  <mat-icon class="text-sm">{{ currentlyPlaying() === 'A' ? 'stop' : 'play_arrow' }}</mat-icon>
+                  <span>{{ currentlyPlaying() === 'A' ? 'Parar' : 'Ouvir Vivaldi' }}</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="tamperAudio('A')"
+                  class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 text-xs font-medium flex items-center gap-1 cursor-pointer"
+                  title="Injeta 4 bytes de ruído no áudio para disparar I1a">
+                  <mat-icon class="text-sm">pest_control</mat-icon>
+                  <span>Corromper</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="setAudioToMatchTarget('A')"
+                  class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs cursor-pointer"
+                  title="Restaura áudio original">
+                  <mat-icon class="text-sm">restart_alt</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- Audio B Mini -->
+            <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-amber-400">Alvo B (Recomposição/Derivação)</span>
+                  <span class="text-[10px] font-mono text-slate-400">{{ audioBSizeKb() }} KB · 44.1kHz</span>
+                </div>
+                <div class="text-sm font-medium text-white mt-1">{{ currentLedger().target_b.title }}</div>
+                <div class="text-xs text-slate-400">{{ currentLedger().target_b.artist }} ({{ currentLedger().target_b.year }})</div>
+                <div class="mt-2 text-[10px] font-mono text-slate-500 truncate">
+                  SHA-256: {{ audioBComputedSha() }}
+                </div>
+              </div>
+              <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-800/60">
+                <button
+                  type="button"
+                  (click)="playAudio('B')"
+                  class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-medium flex items-center gap-1 cursor-pointer">
+                  <mat-icon class="text-sm">{{ currentlyPlaying() === 'B' ? 'stop' : 'play_arrow' }}</mat-icon>
+                  <span>{{ currentlyPlaying() === 'B' ? 'Parar' : 'Ouvir Richter' }}</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="tamperAudio('B')"
+                  class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 text-rose-300 text-xs font-medium flex items-center gap-1 cursor-pointer"
+                  title="Injeta 4 bytes de ruído no áudio para disparar I1b">
+                  <mat-icon class="text-sm">pest_control</mat-icon>
+                  <span>Corromper</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="setAudioToMatchTarget('B')"
+                  class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs cursor-pointer"
+                  title="Restaura áudio original">
+                  <mat-icon class="text-sm">restart_alt</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 2: LABORATÓRIO DE ÁUDIO & WAVEFORM     -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'audio') {
+      <div class="space-y-6">
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                <mat-icon class="text-cyan-400">graphic_eq</mat-icon>
+                <span>Laboratório de Formas de Onda e Verificação Criptográfica de Áudio</span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">
+                Renderização acústica de 44.1kHz 16-bit PCM WAV. Verificação dos contratos <span class="font-mono text-cyan-300">I1a</span> e <span class="font-mono text-cyan-300">I1b</span> (SHA-256 match exato de 32 bytes).
+              </p>
+            </div>
+            @if (currentlyPlaying()) {
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-700/60 text-cyan-300 text-xs font-mono animate-pulse">
+                <mat-icon class="text-sm">volume_up</mat-icon>
+                <span>Reproduzindo Alvo {{ currentlyPlaying() }} ({{ audioPlayProgress().toFixed(0) }}%)</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Two Waveform Decks -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Deck A: Vivaldi -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                  <span class="font-semibold text-sm text-white">Deck A: {{ currentLedger().target_a.title }}</span>
+                </div>
+                <span class="text-xs font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded">Alvo A</span>
+              </div>
+
+              <!-- Metadata & Hashes -->
+              <div class="grid grid-cols-2 gap-2 mt-4 text-xs">
+                <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                  <span class="text-[10px] text-slate-500 block">Compositor / Artista</span>
+                  <span class="font-medium text-slate-200">{{ currentLedger().target_a.artist }} ({{ currentLedger().target_a.year }})</span>
+                </div>
+                <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                  <span class="text-[10px] text-slate-500 block">Taxa de Amostragem</span>
+                  <span class="font-mono text-slate-200">44.100 Hz · 16-bit PCM</span>
+                </div>
+                <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60 col-span-2">
+                  <span class="text-[10px] text-slate-500 block">SHA-256 Declarado no Ledger</span>
+                  <span class="font-mono text-[11px] text-cyan-300 break-all">{{ currentLedger().target_a.sha256 }}</span>
+                </div>
+                <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60 col-span-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] text-slate-500">SHA-256 Calculado em Tempo Real</span>
+                    <span
+                      class="text-[10px] font-mono px-1.5 rounded"
+                      [class.bg-emerald-950]="audioAComputedSha() === currentLedger().target_a.sha256"
+                      [class.text-emerald-300]="audioAComputedSha() === currentLedger().target_a.sha256"
+                      [class.bg-rose-950]="audioAComputedSha() !== currentLedger().target_a.sha256"
+                      [class.text-rose-300]="audioAComputedSha() !== currentLedger().target_a.sha256">
+                      {{ audioAComputedSha() === currentLedger().target_a.sha256 ? '✓ Match I1a' : '✗ Divergência I1a' }}
+                    </span>
+                  </div>
+                  <span class="font-mono text-[11px] text-slate-300 break-all">{{ audioAComputedSha() }}</span>
+                </div>
+              </div>
+
+              <!-- Waveform Visualization -->
+              <div class="mt-4 bg-slate-950 rounded-xl p-4 border border-slate-800 relative overflow-hidden">
+                <div class="flex items-center justify-between text-[10px] text-slate-500 mb-2 font-mono">
+                  <span>Osciloscópio PCM (0s - 3.2s)</span>
+                  <span>{{ audioASizeKb() }} KB</span>
+                </div>
+                <!-- Visual waveform bars -->
+                <div class="h-16 flex items-end gap-1 px-1">
+                  @for (bar of audioAWaveformPoints(); track $index) {
+                    <div
+                      class="flex-1 bg-cyan-400/80 hover:bg-cyan-300 rounded-t transition-all"
+                      [style.height.px]="bar">
+                    </div>
+                  }
+                </div>
+                @if (currentlyPlaying() === 'A') {
+                  <div
+                    class="absolute top-0 bottom-0 w-0.5 bg-cyan-300 shadow-[0_0_8px_cyan] pointer-events-none transition-all"
+                    [style.left.%]="audioPlayProgress()">
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Controls Deck A -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-5 pt-4 border-t border-slate-800">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  (click)="playAudio('A')"
+                  class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                  <mat-icon class="text-sm">{{ currentlyPlaying() === 'A' ? 'stop' : 'play_arrow' }}</mat-icon>
+                  <span>{{ currentlyPlaying() === 'A' ? 'Parar Áudio' : 'Reproduzir Faixa' }}</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="downloadWav('A')"
+                  class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 cursor-pointer">
+                  <mat-icon class="text-sm">download</mat-icon>
+                  <span>Baixar WAV</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <label
+                  class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 cursor-pointer"
+                  title="Substituir por arquivo local">
+                  <mat-icon class="text-sm">upload_file</mat-icon>
+                  <span>Carregar</span>
+                  <input type="file" class="hidden" accept="audio/*" (change)="handleAudioFileUpload('A', $event)">
+                </label>
+                <button
+                  type="button"
+                  (click)="tamperAudio('A')"
+                  class="px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 text-xs font-medium flex items-center gap-1 cursor-pointer"
+                  title="Injetar ruído malicioso">
+                  <mat-icon class="text-sm">bug_report</mat-icon>
+                  <span>Adulterar</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="setAudioToMatchTarget('A')"
+                  class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs cursor-pointer"
+                  title="Restaurar padrão">
+                  <mat-icon class="text-sm">restart_alt</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deck B: Richter -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                  <span class="font-semibold text-sm text-white">Deck B: {{ currentLedger().target_b.title }}</span>
+                </div>
+                <span class="text-xs font-mono text-amber-400 bg-amber-950/60 border border-amber-800/40 px-2 py-0.5 rounded">Alvo B</span>
+              </div>
+
+              <!-- Metadata & Hashes -->
+              <div class="grid grid-cols-2 gap-2 mt-4 text-xs">
+                <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                  <span class="text-[10px] text-slate-500 block">Compositor / Artista</span>
+                  <span class="font-medium text-slate-200">{{ currentLedger().target_b.artist }} ({{ currentLedger().target_b.year }})</span>
+                </div>
+                <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                  <span class="text-[10px] text-slate-500 block">Taxa de Amostragem</span>
+                  <span class="font-mono text-slate-200">44.100 Hz · 16-bit PCM</span>
+                </div>
+                <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60 col-span-2">
+                  <span class="text-[10px] text-slate-500 block">SHA-256 Declarado no Ledger</span>
+                  <span class="font-mono text-[11px] text-amber-300 break-all">{{ currentLedger().target_b.sha256 }}</span>
+                </div>
+                <div class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60 col-span-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] text-slate-500">SHA-256 Calculado em Tempo Real</span>
+                    <span
+                      class="text-[10px] font-mono px-1.5 rounded"
+                      [class.bg-emerald-950]="audioBComputedSha() === currentLedger().target_b.sha256"
+                      [class.text-emerald-300]="audioBComputedSha() === currentLedger().target_b.sha256"
+                      [class.bg-rose-950]="audioBComputedSha() !== currentLedger().target_b.sha256"
+                      [class.text-rose-300]="audioBComputedSha() !== currentLedger().target_b.sha256">
+                      {{ audioBComputedSha() === currentLedger().target_b.sha256 ? '✓ Match I1b' : '✗ Divergência I1b' }}
+                    </span>
+                  </div>
+                  <span class="font-mono text-[11px] text-slate-300 break-all">{{ audioBComputedSha() }}</span>
+                </div>
+              </div>
+
+              <!-- Waveform Visualization -->
+              <div class="mt-4 bg-slate-950 rounded-xl p-4 border border-slate-800 relative overflow-hidden">
+                <div class="flex items-center justify-between text-[10px] text-slate-500 mb-2 font-mono">
+                  <span>Osciloscópio PCM (0s - 3.2s)</span>
+                  <span>{{ audioBSizeKb() }} KB</span>
+                </div>
+                <!-- Visual waveform bars -->
+                <div class="h-16 flex items-end gap-1 px-1">
+                  @for (bar of audioBWaveformPoints(); track $index) {
+                    <div
+                      class="flex-1 bg-amber-400/80 hover:bg-amber-300 rounded-t transition-all"
+                      [style.height.px]="bar">
+                    </div>
+                  }
+                </div>
+                @if (currentlyPlaying() === 'B') {
+                  <div
+                    class="absolute top-0 bottom-0 w-0.5 bg-amber-300 shadow-[0_0_8px_gold] pointer-events-none transition-all"
+                    [style.left.%]="audioPlayProgress()">
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Controls Deck B -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-5 pt-4 border-t border-slate-800">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  (click)="playAudio('B')"
+                  class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                  <mat-icon class="text-sm">{{ currentlyPlaying() === 'B' ? 'stop' : 'play_arrow' }}</mat-icon>
+                  <span>{{ currentlyPlaying() === 'B' ? 'Parar Áudio' : 'Reproduzir Faixa' }}</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="downloadWav('B')"
+                  class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 cursor-pointer">
+                  <mat-icon class="text-sm">download</mat-icon>
+                  <span>Baixar WAV</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <label
+                  class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1 cursor-pointer"
+                  title="Substituir por arquivo local">
+                  <mat-icon class="text-sm">upload_file</mat-icon>
+                  <span>Carregar</span>
+                  <input type="file" class="hidden" accept="audio/*" (change)="handleAudioFileUpload('B', $event)">
+                </label>
+                <button
+                  type="button"
+                  (click)="tamperAudio('B')"
+                  class="px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 text-xs font-medium flex items-center gap-1 cursor-pointer"
+                  title="Injetar ruído malicioso">
+                  <mat-icon class="text-sm">bug_report</mat-icon>
+                  <span>Adulterar</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="setAudioToMatchTarget('B')"
+                  class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs cursor-pointer"
+                  title="Restaurar padrão">
+                  <mat-icon class="text-sm">restart_alt</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparative Metrics -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <mat-icon class="text-indigo-400">compare</mat-icon>
+            <span>Métricas Comparativas Acústicas e Vetoriais</span>
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+            <div class="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/80">
+              <span class="text-slate-400 block text-[11px]">Distância Acústica</span>
+              <span class="text-lg font-bold text-white font-mono mt-1 block">0.042</span>
+              <span class="text-[10px] text-emerald-400 font-mono">Diferença espectral mínima</span>
+            </div>
+            <div class="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/80">
+              <span class="text-slate-400 block text-[11px]">Similaridade Cosseno CLAP</span>
+              <span class="text-lg font-bold text-cyan-300 font-mono mt-1 block">0.912</span>
+              <span class="text-[10px] text-slate-400 font-mono">Embedding neural semântico</span>
+            </div>
+            <div class="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/80">
+              <span class="text-slate-400 block text-[11px]">Contorno Melódico (Pitch)</span>
+              <span class="text-lg font-bold text-amber-300 font-mono mt-1 block">0.884</span>
+              <span class="text-[10px] text-slate-400 font-mono">Correlação F0 dinâmica</span>
+            </div>
+            <div class="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/80">
+              <span class="text-slate-400 block text-[11px]">Razão Melódica Efetiva</span>
+              <span class="text-lg font-bold text-purple-300 font-mono mt-1 block">1.275</span>
+              <span class="text-[10px] text-emerald-400 font-mono">&gt; 1.0 (Derivação válida)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 3: MATRIZ I1–I15b                      -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'matrix') {
+      <div class="space-y-5">
+        <!-- Filter and Search Header -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <span class="text-slate-400 text-[11px] mr-1">Filtrar:</span>
+            <button
+              type="button"
+              (click)="matrixFilter.set('all')"
+              class="px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer"
+              [class.bg-cyan-500]="matrixFilter() === 'all'"
+              [class.text-slate-950]="matrixFilter() === 'all'"
+              [class.bg-slate-800]="matrixFilter() !== 'all'"
+              [class.text-slate-300]="matrixFilter() !== 'all'">
+              Todos ({{ verificationReport()?.checks?.length || 0 }})
+            </button>
+            <button
+              type="button"
+              (click)="matrixFilter.set('fail')"
+              class="px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer"
+              [class.bg-rose-600]="matrixFilter() === 'fail'"
+              [class.text-white]="matrixFilter() === 'fail'"
+              [class.bg-slate-800]="matrixFilter() !== 'fail'"
+              [class.text-rose-300]="matrixFilter() !== 'fail'">
+              Falhas ({{ failCount() }})
+            </button>
+            <button
+              type="button"
+              (click)="matrixFilter.set('pass')"
+              class="px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer"
+              [class.bg-emerald-600]="matrixFilter() === 'pass'"
+              [class.text-white]="matrixFilter() === 'pass'"
+              [class.bg-slate-800]="matrixFilter() !== 'pass'"
+              [class.text-emerald-300]="matrixFilter() !== 'pass'">
+              Aprovados ({{ passCount() }})
+            </button>
+            <button
+              type="button"
+              (click)="matrixFilter.set('warn')"
+              class="px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer"
+              [class.bg-amber-600]="matrixFilter() === 'warn'"
+              [class.text-white]="matrixFilter() === 'warn'"
+              [class.bg-slate-800]="matrixFilter() !== 'warn'"
+              [class.text-amber-300]="matrixFilter() !== 'warn'">
+              Avisos ({{ warnCount() }})
+            </button>
+          </div>
+
+          <!-- Search input -->
+          <div class="relative w-64">
+            <mat-icon class="absolute left-2.5 top-2 text-slate-500 text-sm">search</mat-icon>
+            <input
+              type="text"
+              placeholder="Buscar verificação..."
+              [value]="matrixSearchQuery()"
+              (input)="matrixSearchQuery.set($any($event.target).value)"
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+          </div>
+        </div>
+
+        <!-- Table View of Checks -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/80 text-slate-400 font-mono uppercase text-[10px] border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">ID</th>
+                  <th class="py-3 px-4">Nome da Verificação</th>
+                  <th class="py-3 px-4">Severidade</th>
+                  <th class="py-3 px-4">Categoria</th>
+                  <th class="py-3 px-4">Detalhes Criptográficos</th>
+                  <th class="py-3 px-4 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 font-sans">
+                @for (c of filteredChecks(); track c.id) {
+                  <tr class="hover:bg-slate-800/30 transition-colors">
+                    <td class="py-3 px-4 whitespace-nowrap">
+                      <span
+                        class="inline-flex items-center gap-1 font-mono font-semibold px-2 py-0.5 rounded text-[11px]"
+                        [class.bg-emerald-950]="c.result === 'PASS'"
+                        [class.text-emerald-300]="c.result === 'PASS'"
+                        [class.border]="true"
+                        [class.border-emerald-800]="c.result === 'PASS'"
+                        [class.bg-rose-950]="c.result === 'FAIL'"
+                        [class.text-rose-300]="c.result === 'FAIL'"
+                        [class.border-rose-800]="c.result === 'FAIL'"
+                        [class.bg-amber-950]="c.result === 'WARN'"
+                        [class.text-amber-300]="c.result === 'WARN'"
+                        [class.border-amber-800]="c.result === 'WARN'"
+                        [class.bg-slate-800]="c.result === 'NOT_CHECKED'"
+                        [class.text-slate-400]="c.result === 'NOT_CHECKED'"
+                        [class.border-slate-700]="c.result === 'NOT_CHECKED'">
+                        <mat-icon class="text-xs">
+                          {{ c.result === 'PASS' ? 'check' : c.result === 'FAIL' ? 'close' : c.result === 'WARN' ? 'warning' : 'remove' }}
+                        </mat-icon>
+                        {{ c.result }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 font-mono font-bold text-white">{{ c.id }}</td>
+                    <td class="py-3 px-4 font-medium text-slate-200">{{ c.name }}</td>
+                    <td class="py-3 px-4">
+                      <span
+                        class="text-[10px] font-mono px-2 py-0.5 rounded"
+                        [class.bg-rose-950/60]="c.severity === 'hard'"
+                        [class.text-rose-300]="c.severity === 'hard'"
+                        [class.bg-indigo-950/60]="c.severity === 'external'"
+                        [class.text-indigo-300]="c.severity === 'external'"
+                        [class.bg-slate-800]="c.severity === 'heuristic'"
+                        [class.text-slate-400]="c.severity === 'heuristic'">
+                        {{ c.severity }}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-slate-400 capitalize">{{ c.category || '—' }}</td>
+                    <td class="py-3 px-4 font-mono text-[11px] text-slate-300 max-w-xs truncate" title="{{ c.detail }}">
+                      {{ c.detail }}
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                      <button
+                        type="button"
+                        (click)="selectedCheck.set(c)"
+                        class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] cursor-pointer">
+                        Ver
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Check Details Modal -->
+        @if (selectedCheck(); as chk) {
+          <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+              <button
+                type="button"
+                (click)="selectedCheck.set(null)"
+                class="absolute right-4 top-4 text-slate-400 hover:text-white cursor-pointer">
+                <mat-icon>close</mat-icon>
+              </button>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono font-bold bg-cyan-950 border border-cyan-800 text-cyan-300 px-2 py-0.5 rounded">{{ chk.id }}</span>
+                <h3 class="text-base font-bold text-white">{{ chk.name }}</h3>
+              </div>
+              <div class="mt-4 space-y-3 text-xs">
+                <div>
+                  <span class="text-slate-400 block text-[11px]">Resultado & Severidade</span>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-mono font-bold text-emerald-400">{{ chk.result }}</span>
+                    <span class="text-slate-500">•</span>
+                    <span class="font-mono text-slate-300">{{ chk.severity }} severity</span>
+                  </div>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[11px]">Detalhe Criptográfico Executado</span>
+                  <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-[11px] text-slate-200 break-all mt-1">
+                    {{ chk.detail }}
+                  </div>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[11px]">Especificação Arkhe Preflight v21</span>
+                  <p class="text-slate-300 mt-1 leading-relaxed">
+                    Esta verificação cumpre o contrato do verificador em conformidade com o script oficial de release <code class="text-cyan-400">arkhe_preflight_v21.py</code>.
+                  </p>
+                </div>
+              </div>
+              <div class="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  (click)="selectedCheck.set(null)"
+                  class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium cursor-pointer">
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 4: ÁRVORE & MERKLE MOUNTAIN RANGE (MMR) -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'mmr') {
+      <div class="space-y-6">
+        <!-- Interactive MMR Calculator -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                <mat-icon class="text-indigo-400">terrain</mat-icon>
+                <span>Explorador Visual e Simulador de Merkle Mountain Range (MMR)</span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">
+                Decomposição binária em picos perfeitos, cálculo de <code class="text-cyan-300">leafToMountain()</code> e dobramento de inclusão canônico.
+              </p>
+            </div>
+            <!-- Input Sliders -->
+            <div class="flex items-center gap-4 text-xs font-mono">
+              <div>
+                <label for="leaf-count-top" class="text-[11px] text-slate-400 block">Total de Folhas (count):</label>
+                <input
+                  id="leaf-count-top"
+                  type="number"
+                  min="1"
+                  max="32"
+                  [value]="calcLeafCount()"
+                  (input)="updateMmrCalcCount($any($event.target).value)"
+                  class="w-20 bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white text-center font-bold">
+              </div>
+              <div>
+                <label for="leaf-index-top" class="text-[11px] text-slate-400 block">Índice Alvo (leaf):</label>
+                <input
+                  id="leaf-index-top"
+                  type="number"
+                  min="0"
+                  [max]="calcLeafCount() - 1"
+                  [value]="calcLeafIndex()"
+                  (input)="updateMmrCalcLeaf($any($event.target).value)"
+                  class="w-20 bg-slate-950 border border-slate-800 rounded px-2 py-1 text-cyan-400 text-center font-bold">
+              </div>
+            </div>
+          </div>
+
+          <!-- MMR Decomposition Result -->
+          @if (calcMountainResult(); as res) {
+            @if (res.valid) {
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 text-xs font-mono">
+                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                  <span class="text-slate-500 text-[10px] block">Pico Responsável</span>
+                  <span class="text-lg font-bold text-indigo-400">Pico {{ res.peakIndex }}</span>
+                </div>
+                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                  <span class="text-slate-500 text-[10px] block">Altura do Pico (Height)</span>
+                  <span class="text-lg font-bold text-cyan-400">{{ res.height }} ({{ treeLeavesForHeight(res.height) }} folhas)</span>
+                </div>
+                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                  <span class="text-slate-500 text-[10px] block">Índice Local na Árvore</span>
+                  <span class="text-lg font-bold text-emerald-400">{{ res.localIdx }}</span>
+                </div>
+                <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                  <span class="text-slate-500 text-[10px] block">Direções Esperadas</span>
+                  <span class="text-base font-bold text-amber-400">[{{ res.directions.join(', ') }}]</span>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- SVG Visual Tree Representation -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3 text-xs">
+            <span class="font-semibold text-white">Cordilheira de Árvores Binárias Perfeitas</span>
+            <div class="flex items-center gap-3 text-[11px] font-mono text-slate-400">
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-cyan-400"></span> Folha Alvo</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-indigo-500"></span> Pico (Peak)</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto bg-slate-950 rounded-xl p-4 border border-slate-800">
+            <svg
+              [attr.width]="mmrSvgVisual().width"
+              [attr.height]="mmrSvgVisual().height"
+              class="mx-auto block">
+              <!-- Render edges -->
+              @for (edge of mmrSvgVisual().edges; track $index) {
+                <line
+                  [attr.x1]="edge.x1"
+                  [attr.y1]="edge.y1"
+                  [attr.x2]="edge.x2"
+                  [attr.y2]="edge.y2"
+                  stroke="#334155"
+                  stroke-width="2" />
+              }
+              <!-- Render nodes -->
+              @for (node of mmrSvgVisual().nodes; track node.id) {
+                <g [attr.transform]="'translate(' + node.x + ',' + node.y + ')'">
+                  <circle
+                    r="14"
+                    [attr.fill]="node.isTargetLeaf ? '#06b6d4' : node.isPeak ? '#6366f1' : '#1e293b'"
+                    [attr.stroke]="node.isTargetLeaf ? '#67e8f9' : node.isPeak ? '#a5b4fc' : '#475569'"
+                    stroke-width="2" />
+                  <text
+                    text-anchor="middle"
+                    dy="4"
+                    font-size="9"
+                    font-family="monospace"
+                    [attr.fill]="node.isTargetLeaf ? '#090d16' : '#f8fafc'"
+                    font-weight="bold">
+                    {{ node.label.slice(0, 5) }}
+                  </text>
+                </g>
+              }
+            </svg>
+          </div>
+        </div>
+
+        <!-- Path Fold Sequence from Current Ledger -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <mat-icon class="text-cyan-400">account_tree</mat-icon>
+            <span>Caminho de Inclusão Criptográfico Registado no Ledger</span>
+          </h3>
+
+          <div class="space-y-2">
+            @for (step of currentLedger().anchor?.path || []; track $index) {
+              <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs font-mono">
+                <div class="flex items-center gap-3">
+                  <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-[10px] font-bold">
+                    {{ $index + 1 }}
+                  </span>
+                  <div>
+                    <span class="text-slate-400">Passo {{ $index }}: Dobramento com Direção</span>
+                    <span
+                      class="ml-2 font-bold px-2 py-0.5 rounded text-[10px]"
+                      [class.bg-cyan-950]="step.direction === 'L'"
+                      [class.text-cyan-300]="step.direction === 'L'"
+                      [class.bg-amber-950]="step.direction === 'R'"
+                      [class.text-amber-300]="step.direction === 'R'">
+                      {{ step.direction === 'L' ? 'L (Esquerda)' : 'R (Direita)' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="text-slate-300 font-mono text-[11px]">
+                  Hash Irmão: <span class="text-cyan-400">{{ step.sibling_hash.slice(0, 24) }}…</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 5: MANIFESTO C2PA (P0-1)               -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'c2pa') {
+      <div class="space-y-6">
+        <!-- P0-1 Contract Highlight Banner -->
+        <div class="bg-gradient-to-r from-indigo-950/40 to-slate-900 border border-indigo-500/30 rounded-2xl p-5">
+          <div class="flex items-start gap-3">
+            <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+              <mat-icon>security</mat-icon>
+            </div>
+            <div>
+              <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>Contrato P0-1 Arkhe Preflight v21 · Separação Declarado vs Verificado</span>
+                <span class="text-[10px] font-mono bg-indigo-900/60 text-indigo-200 px-2 py-0.5 rounded">Core Contract</span>
+              </h2>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                O ledger declara os hashes e identidades dos ativos, mas o motor preflight só valida o selo de segurança com base no resultado verificado emitido pelo leitor C2PA independente. Isso impede que um ledger malicioso "declare" falsamente um status válido de um assinante não confiável.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- C2PA Target A & B Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- C2PA Target A -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="font-bold text-sm text-cyan-400">Manifesto C2PA · Alvo A</span>
+              <span
+                class="text-xs font-mono px-2 py-0.5 rounded"
+                [class.bg-emerald-950]="c2paAVerified().trust === 'trusted'"
+                [class.text-emerald-300]="c2paAVerified().trust === 'trusted'"
+                [class.bg-rose-950]="c2paAVerified().trust !== 'trusted'"
+                [class.text-rose-300]="c2paAVerified().trust !== 'trusted'">
+                {{ c2paAVerified().trust }}
+              </span>
+            </div>
+
+            <!-- Checks -->
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400">Integridade JUMBF (I10v)</span>
+                <span class="font-mono font-bold text-emerald-400 uppercase">{{ c2paAVerified().integrity }}</span>
+              </div>
+              <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400">Assinatura Digital X.509</span>
+                <span class="font-mono font-bold text-emerald-400 uppercase">{{ c2paAVerified().signature }}</span>
+              </div>
+              <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400">Hard Binding SHA-256 (I3)</span>
+                <span class="font-mono font-bold text-emerald-400 uppercase">{{ c2paAVerified().hard_binding }}</span>
+              </div>
+            </div>
+
+            <!-- Certificate Box -->
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] font-mono space-y-1">
+              <span class="text-slate-500 block text-[10px]">Cadeia de Certificação X.509</span>
+              <div class="text-slate-300">Emissor: DigiCert Global Root CA</div>
+              <div class="text-slate-300">Sujeito: Arkhe Music Provenance Vault IT</div>
+              <div class="text-slate-400 truncate">S/N: 4A:8B:12:F3:99:C2:55:01</div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                (click)="toggleC2paIntegrity('A')"
+                class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 cursor-pointer">
+                Alternar Integridade
+              </button>
+              <button
+                type="button"
+                (click)="toggleC2paTrust('A')"
+                class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 cursor-pointer">
+                Alternar Confiança (I10c)
+              </button>
+            </div>
+          </div>
+
+          <!-- C2PA Target B -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="font-bold text-sm text-amber-400">Manifesto C2PA · Alvo B</span>
+              <span
+                class="text-xs font-mono px-2 py-0.5 rounded"
+                [class.bg-emerald-950]="c2paBVerified().trust === 'trusted'"
+                [class.text-emerald-300]="c2paBVerified().trust === 'trusted'"
+                [class.bg-rose-950]="c2paBVerified().trust !== 'trusted'"
+                [class.text-rose-300]="c2paBVerified().trust !== 'trusted'">
+                {{ c2paBVerified().trust }}
+              </span>
+            </div>
+
+            <!-- Checks -->
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400">Integridade JUMBF (I10v)</span>
+                <span class="font-mono font-bold text-emerald-400 uppercase">{{ c2paBVerified().integrity }}</span>
+              </div>
+              <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400">Assinatura Digital X.509</span>
+                <span class="font-mono font-bold text-emerald-400 uppercase">{{ c2paBVerified().signature }}</span>
+              </div>
+              <div class="flex items-center justify-between bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400">Hard Binding SHA-256 (I3)</span>
+                <span class="font-mono font-bold text-emerald-400 uppercase">{{ c2paBVerified().hard_binding }}</span>
+              </div>
+            </div>
+
+            <!-- Certificate Box -->
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] font-mono space-y-1">
+              <span class="text-slate-500 block text-[10px]">Cadeia de Certificação X.509</span>
+              <div class="text-slate-300">Emissor: DigiCert Global Root CA</div>
+              <div class="text-slate-300">Sujeito: Deutsche Grammophon Master CA DE</div>
+              <div class="text-slate-400 truncate">S/N: 7C:1E:44:A2:81:99:00:BF</div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                (click)="toggleC2paIntegrity('B')"
+                class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 cursor-pointer">
+                Alternar Integridade
+              </button>
+              <button
+                type="button"
+                (click)="toggleC2paTrust('B')"
+                class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 cursor-pointer">
+                Alternar Confiança (I10c)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 6: ANCORAGEM SOLANA & WEB3 STUDIO      -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'solana') {
+      <div class="space-y-6">
+        <!-- Top Status & Cluster Bar -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <mat-icon>hub</mat-icon>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base font-bold text-white">Estúdio Web3 · Ancoragem On-Chain Solana</h2>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/80">
+                  SPL Memo Protocol
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Validação e publicação de compromissos imutáveis no programa <code class="text-emerald-300">MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr</code>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Cluster Selector & RPC Latency -->
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-mono">
+              <span class="w-2 h-2 rounded-full" [class.bg-emerald-400]="rpcLatencyMs() !== null" [class.bg-rose-400]="rpcLatencyMs() === null"></span>
+              <span class="text-slate-400">Latência RPC:</span>
+              <span class="text-slate-200 font-bold">{{ rpcLatencyMs() !== null ? rpcLatencyMs() + ' ms' : 'Offline' }}</span>
+            </div>
+
+            <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+              @for (c of availableClusters; track c.id) {
+                <button
+                  type="button"
+                  (click)="switchSolanaCluster(c.id)"
+                  class="px-2.5 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer"
+                  [class.bg-emerald-500]="solanaCluster() === c.id"
+                  [class.text-slate-950]="solanaCluster() === c.id"
+                  [class.font-bold]="solanaCluster() === c.id"
+                  [class.text-slate-400]="solanaCluster() !== c.id"
+                  [class.hover:text-slate-200]="solanaCluster() !== c.id">
+                  {{ c.name.replace('Solana ', '') }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Wallet Station Card -->
+        <div class="bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-slate-950 border border-slate-800 rounded-2xl p-5">
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
+                <mat-icon>account_balance_wallet</mat-icon>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-bold text-white">{{ solanaWallet().walletName }}</span>
+                  <span
+                    class="text-[10px] font-mono px-2 py-0.5 rounded"
+                    [class.bg-emerald-950]="solanaWallet().connected"
+                    [class.text-emerald-300]="solanaWallet().connected"
+                    [class.border]="true"
+                    [class.border-emerald-800]="solanaWallet().connected"
+                    [class.bg-slate-800]="!solanaWallet().connected"
+                    [class.text-slate-400]="!solanaWallet().connected">
+                    {{ solanaWallet().connected ? 'Conectada (' + solanaWallet().providerType + ')' : 'Desconectada' }}
+                  </span>
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 font-mono flex items-center gap-2">
+                  @if (solanaWallet().publicKey) {
+                    <span>Chave Pública: <strong class="text-purple-300">{{ solanaWallet().publicKey?.slice(0, 8) }}…{{ solanaWallet().publicKey?.slice(-8) }}</strong></span>
+                    <button
+                      type="button"
+                      (click)="copyText(solanaWallet().publicKey || '', 'Chave Pública')"
+                      class="text-slate-400 hover:text-white cursor-pointer"
+                      title="Copiar chave pública">
+                      <mat-icon class="text-xs">content_copy</mat-icon>
+                    </button>
+                  } @else {
+                    <span>Nenhuma carteira ativa</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Balance & Actions -->
+            <div class="flex items-center gap-3">
+              <div class="bg-slate-950/80 px-4 py-2 rounded-xl border border-slate-800 text-right font-mono">
+                <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Saldo em Carteira</span>
+                <span class="text-base font-bold text-emerald-400">{{ solanaWallet().balanceSol.toFixed(4) }} SOL</span>
+                <span class="text-[10px] text-slate-500 block">({{ solanaWallet().balanceLamports.toLocaleString() }} lamports)</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                @if (solanaWallet().connected) {
+                  <button
+                    type="button"
+                    (click)="requestSolAirdrop()"
+                    class="flex items-center gap-1 px-3 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs font-semibold cursor-pointer">
+                    <mat-icon class="text-sm">savings</mat-icon>
+                    <span>+1 SOL Airdrop</span>
+                  </button>
+                  <button
+                    type="button"
+                    (click)="disconnectSolanaWallet()"
+                    class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium cursor-pointer">
+                    Desconectar
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="connectPhantomOrSolflare()"
+                    class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md cursor-pointer">
+                    <mat-icon class="text-sm">account_balance_wallet</mat-icon>
+                    <span>Conectar Phantom / Solflare</span>
+                  </button>
+                  <button
+                    type="button"
+                    (click)="generateEphemeralWallet()"
+                    class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 cursor-pointer">
+                    <mat-icon class="text-sm">key</mat-icon>
+                    <span>Gerar Carteira Devnet</span>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Explainer -->
+          <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Para testar a ancoragem completa sem extensões, use a <strong>Carteira Efêmera Devnet</strong> integrada.</span>
+            <span>Programa Memo SPL: <strong class="text-slate-300 font-mono">MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr</strong></span>
+          </div>
+        </div>
+
+        <!-- 1-Click On-Chain Anchor Publisher -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <mat-icon class="text-cyan-400">send_and_archive</mat-icon>
+                <span>Publicação & Ancoragem On-Chain em 1 Clique</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">
+                Gera o compromisso criptográfico canônico derivado do áudio e MMR, e publica como memo imutável no consenso Solana.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              (click)="executeAnchorToSolana()"
+              [disabled]="anchorProgress().active"
+              class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/50 cursor-pointer disabled:opacity-50">
+              <mat-icon class="text-base">{{ anchorProgress().active ? 'hourglass_top' : 'rocket_launch' }}</mat-icon>
+              <span>{{ anchorProgress().active ? 'Ancorando na Blockchain…' : 'Ancorar Ledger na Solana Agora' }}</span>
+            </button>
+          </div>
+
+          <!-- Anchor Calculation Summary Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+            <div class="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800/80">
+              <span class="text-slate-500 text-[10px] block">1. Content Hash (RFC 8785)</span>
+              <span class="text-slate-200 font-bold break-all block mt-1">{{ currentLedger().content_hash?.slice(0, 24) || '—' }}…</span>
+              <span class="text-[10px] text-cyan-400 mt-1 block">Derivado dos alvos A e B</span>
+            </div>
+
+            <div class="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800/80">
+              <span class="text-slate-500 text-[10px] block">2. Raiz MMR (Mountain Range)</span>
+              <span class="text-slate-200 font-bold break-all block mt-1">{{ currentLedger().anchor?.mmr_root?.slice(0, 24) || '—' }}…</span>
+              <span class="text-[10px] text-purple-400 mt-1 block">Árvore de Merkle incremental</span>
+            </div>
+
+            <div class="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800/80">
+              <span class="text-slate-500 text-[10px] block">3. Compromisso Criptográfico Base58</span>
+              <span class="text-emerald-400 font-bold break-all block mt-1">{{ currentLedger().anchor?.anchor_commitment || '—' }}</span>
+              <span class="text-[10px] text-slate-400 mt-1 block">H(ARKHE:v1 || content || mmr)</span>
+            </div>
+          </div>
+
+          <!-- Progress Alert Bar (if active or completed) -->
+          @if (anchorProgress().step !== 'idle') {
+            <div
+              class="p-4 rounded-xl border text-xs font-mono space-y-2"
+              [class.bg-emerald-950/40]="anchorProgress().step === 'completed'"
+              [class.border-emerald-800]="anchorProgress().step === 'completed'"
+              [class.text-emerald-200]="anchorProgress().step === 'completed'"
+              [class.bg-cyan-950/40]="anchorProgress().active"
+              [class.border-cyan-800]="anchorProgress().active"
+              [class.text-cyan-200]="anchorProgress().active"
+              [class.bg-rose-950/40]="anchorProgress().step === 'error'"
+              [class.border-rose-800]="anchorProgress().step === 'error'"
+              [class.text-rose-200]="anchorProgress().step === 'error'">
+
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <mat-icon class="text-sm">
+                    {{ anchorProgress().step === 'completed' ? 'check_circle' : anchorProgress().step === 'error' ? 'error' : 'sync' }}
+                  </mat-icon>
+                  <strong class="font-bold">{{ anchorProgress().stepMessage }}</strong>
+                </div>
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-black/40">
+                  Etapa: {{ anchorProgress().step }}
+                </span>
+              </div>
+
+              @if (anchorProgress().txSignature) {
+                <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+                  <div class="truncate">
+                    Assinatura: <strong class="text-white">{{ anchorProgress().txSignature }}</strong>
+                  </div>
+                  <a
+                    [href]="'https://explorer.solana.com/tx/' + anchorProgress().txSignature + '?cluster=' + solanaCluster()"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 underline font-bold">
+                    <span>Ver no Solana Explorer</span>
+                    <mat-icon class="text-xs">open_in_new</mat-icon>
+                  </a>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Deep On-Chain Transaction Inspector -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <mat-icon class="text-indigo-400">policy</mat-icon>
+                <span>Inspetor & Validador On-Chain de Transação Solana</span>
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Verifica as 4 regras on-chain oficiais do Arkhe Preflight: I4 (Assinatura), I5 (Transação), I6 (Memo Binding) e I7 (Tempo).
+              </p>
+            </div>
+
+            <!-- Quick Prefill Buttons -->
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-500 text-[11px]">Exemplos rápidos:</span>
+              <button
+                type="button"
+                (click)="prefillInspector(currentLedger().anchor?.tx_signature || '')"
+                class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-[11px] cursor-pointer">
+                Transação Atual
+              </button>
+              <button
+                type="button"
+                (click)="prefillInspector('4uQ2hXbZ7v9K1mN3pY5rT8wE6aC0jL2mC4vB6xZ8fD1g3hJ5kL7mN9pQ1rS3tU5vW7xY9zA1bC3dE5fG7hI9jK1m')"
+                class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-[11px] cursor-pointer">
+                Válida Canônica
+              </button>
+            </div>
+          </div>
+
+          <!-- Search Input Box -->
+          <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <mat-icon class="absolute left-3 top-2.5 text-slate-500 text-sm">search</mat-icon>
+              <input
+                type="text"
+                placeholder="Insira a assinatura base58 da transação Solana (64 bytes)..."
+                [value]="inspectSearchSignature()"
+                (input)="inspectSearchSignature.set($any($event.target).value)"
+                (keyup.enter)="runInspectTransaction()"
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 font-mono placeholder-slate-600 focus:outline-none focus:border-cyan-500">
+            </div>
+            <button
+              type="button"
+              (click)="runInspectTransaction()"
+              [disabled]="isInspectingTx()"
+              class="flex items-center gap-1 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs cursor-pointer disabled:opacity-50">
+              <mat-icon class="text-sm">manage_search</mat-icon>
+              <span>{{ isInspectingTx() ? 'Consultando…' : 'Inspecionar On-Chain' }}</span>
+            </button>
+          </div>
+
+          <!-- Inspection Output Dashboard -->
+          @if (inspectedTx()) {
+            @let tx = inspectedTx()!;
+            <div class="space-y-4">
+              <!-- 4-Check Verification Scoreboard -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <!-- Check I4 -->
+                <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-mono font-bold text-slate-400">Regra I4</span>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-300">PASS</span>
+                  </div>
+                  <div class="font-semibold text-slate-200">Formato Assinatura</div>
+                  <div class="text-[11px] text-slate-400 font-mono">64 bytes decodificáveis</div>
+                </div>
+
+                <!-- Check I5 -->
+                <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-mono font-bold text-slate-400">Regra I5</span>
+                    <span
+                      class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold"
+                      [class.bg-emerald-950]="tx.found && !tx.err"
+                      [class.text-emerald-300]="tx.found && !tx.err"
+                      [class.bg-rose-950]="!tx.found || tx.err"
+                      [class.text-rose-300]="!tx.found || tx.err">
+                      {{ tx.found && !tx.err ? 'PASS' : 'FAIL' }}
+                    </span>
+                  </div>
+                  <div class="font-semibold text-slate-200">Validade On-Chain</div>
+                  <div class="text-[11px] text-slate-400 font-mono">
+                    {{ tx.found ? 'Finalized sem erros' : 'Não encontrada no bloco' }}
+                  </div>
+                </div>
+
+                <!-- Check I6 -->
+                <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-mono font-bold text-slate-400">Regra I6</span>
+                    <span
+                      class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold"
+                      [class.bg-emerald-950]="tx.commitmentMatches"
+                      [class.text-emerald-300]="tx.commitmentMatches"
+                      [class.bg-rose-950]="!tx.commitmentMatches"
+                      [class.text-rose-300]="!tx.commitmentMatches">
+                      {{ tx.commitmentMatches ? 'PASS' : 'FAIL' }}
+                    </span>
+                  </div>
+                  <div class="font-semibold text-slate-200">Memo Commitment Binding</div>
+                  <div class="text-[11px] text-slate-400 font-mono">
+                    {{ tx.commitmentMatches ? 'Corresponde à raiz' : 'Memo não corresponde' }}
+                  </div>
+                </div>
+
+                <!-- Check I7 -->
+                <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-mono font-bold text-slate-400">Regra I7</span>
+                    <span
+                      class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold"
+                      [class.bg-emerald-950]="tx.blockTimeCompliesWithGeneratedAt"
+                      [class.text-emerald-300]="tx.blockTimeCompliesWithGeneratedAt"
+                      [class.bg-rose-950]="!tx.blockTimeCompliesWithGeneratedAt"
+                      [class.text-rose-300]="!tx.blockTimeCompliesWithGeneratedAt">
+                      {{ tx.blockTimeCompliesWithGeneratedAt ? 'PASS' : 'FAIL' }}
+                    </span>
+                  </div>
+                  <div class="font-semibold text-slate-200">Conformidade Temporal</div>
+                  <div class="text-[11px] text-slate-400 font-mono">
+                    Drift: {{ tx.driftFormatted }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transaction Metadata Grid -->
+              <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3 font-mono text-xs">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                  <span class="font-bold text-slate-300">Detalhes Técnicos da Transação</span>
+                  <a
+                    [href]="'https://explorer.solana.com/tx/' + tx.signature + '?cluster=' + solanaCluster()"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 text-[11px]">
+                    <span>Abrir no Explorador Oficial</span>
+                    <mat-icon class="text-xs">open_in_new</mat-icon>
+                  </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <span class="text-slate-500 text-[10px] block">Slot do Bloco</span>
+                    <span class="text-slate-200 font-bold">{{ tx.slot || '—' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 text-[10px] block">Data do Bloco (Block Time)</span>
+                    <span class="text-slate-200 font-bold">{{ tx.blockTimeIso || '—' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 text-[10px] block">Taxa Paga pelos Validadores</span>
+                    <span class="text-emerald-400 font-bold">{{ tx.feeSol !== null ? tx.feeSol.toFixed(6) + ' SOL' : '—' }}</span>
+                  </div>
+                </div>
+
+                <!-- Extracted Memo Display -->
+                <div class="pt-2">
+                  <span class="text-slate-500 text-[10px] block">Memos Extraídos das Instruções SPL:</span>
+                  @if (tx.extractedMemos.length > 0) {
+                    <div class="space-y-1 mt-1">
+                      @for (memo of tx.extractedMemos; track $index) {
+                        <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 break-all">
+                          <code class="text-emerald-400 font-bold">{{ memo }}</code>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="text-slate-500 italic mt-1">Nenhum memo encontrado na transação.</div>
+                  }
+                </div>
+
+                <!-- Program Execution Logs -->
+                @if (tx.programLogs.length > 0) {
+                  <div class="pt-2">
+                    <span class="text-slate-500 text-[10px] block">Logs de Execução da VM Solana (BFP):</span>
+                    <div class="bg-black/60 p-2.5 rounded-lg border border-slate-800/80 text-[10px] text-slate-400 space-y-0.5 max-h-32 overflow-y-auto">
+                      @for (log of tx.programLogs; track $index) {
+                        <div>{{ log }}</div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 7: CALIBRAÇÃO & CLOPPER-PEARSON        -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'calibration') {
+      <div class="space-y-6">
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <mat-icon class="text-purple-400">query_stats</mat-icon>
+            <span>Simulador Estatístico de Limite Superior Clopper-Pearson</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            O verificador Arkhe impõe um portão de release rigoroso: o quantil binomial exato superior com $\alpha = 0.05$ deve ser $\le 0.05$.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 text-xs font-mono">
+            <div>
+              <label for="cp-trials-input" class="text-slate-400 text-[11px] block">Ensaios de Validação (n):</label>
+              <input
+                id="cp-trials-input"
+                type="number"
+                min="1"
+                [value]="cpTrials()"
+                (input)="updateCpTrials($any($event.target).value)"
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-bold mt-1">
+            </div>
+            <div>
+              <label for="cp-failures-input" class="text-slate-400 text-[11px] block">Falhas / Falsos Positivos (k):</label>
+              <input
+                id="cp-failures-input"
+                type="number"
+                min="0"
+                [value]="cpFailures()"
+                (input)="updateCpFailures($any($event.target).value)"
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-bold mt-1">
+            </div>
+            <div>
+              <span class="text-slate-400 text-[11px] block">Limite Superior (Upper Bound):</span>
+              <div class="p-2.5 rounded-xl border mt-1 font-bold text-sm"
+                [class.bg-emerald-950]="cpUpperComputed().passesGate"
+                [class.border-emerald-600]="cpUpperComputed().passesGate"
+                [class.text-emerald-300]="cpUpperComputed().passesGate"
+                [class.bg-rose-950]="!cpUpperComputed().passesGate"
+                [class.border-rose-600]="!cpUpperComputed().passesGate"
+                [class.text-rose-300]="!cpUpperComputed().passesGate">
+                {{ cpUpperComputed().percentage }}% ({{ cpUpperComputed().passesGate ? '✓ Aprova Portão' : '✗ Rejeita Portão' }})
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 8: VETORES DOURADOS (SELFTEST)         -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'selftest') {
+      <div class="space-y-4">
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <mat-icon class="text-cyan-400">science</mat-icon>
+            <span>Suíte de 7 Vetores Dourados Oficiais (Golden Vectors)</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Execução determinística dos casos de teste padrão da especificação Arkhe v21.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          @for (gv of goldenVectors(); track gv.name) {
+            <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-xs font-mono">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white">{{ gv.name }}</span>
+                <span
+                  class="px-2 py-0.5 rounded font-bold text-[10px]"
+                  [class.bg-emerald-950]="gv.status === 'PASS'"
+                  [class.text-emerald-300]="gv.status === 'PASS'"
+                  [class.border]="true"
+                  [class.border-emerald-700]="gv.status === 'PASS'"
+                  [class.bg-rose-950]="gv.status !== 'PASS'"
+                  [class.text-rose-300]="gv.status !== 'PASS'"
+                  [class.border-rose-700]="gv.status !== 'PASS'">
+                  {{ gv.status === 'PASS' ? '✓ PASS' : '✗ FAIL' }}
+                </span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-2 truncate">
+                Obtido: {{ gv.actual || gv.detail }}
+              </div>
+              <div class="text-[10px] text-slate-500 mt-1 flex items-center justify-between">
+                <span>{{ gv.detail }}</span>
+                <span class="text-emerald-400">Determinístico</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 9: ESTÚDIO JSON & TERMINAL CLI         -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'editor') {
+      <div class="space-y-6">
+        <!-- JSON Editor -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <div>
+              <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+                <mat-icon class="text-cyan-400">code</mat-icon>
+                <span>Editor do Ledger JSON v1.1 (RFC 8785 Determinístico)</span>
+              </h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="recalculateContentHash()"
+                class="px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-medium border border-cyan-500/30 flex items-center gap-1 cursor-pointer">
+                <mat-icon class="text-xs">calculate</mat-icon>
+                <span>Recalcular Hashes Canônicos</span>
+              </button>
+              <button
+                type="button"
+                (click)="formatJson()"
+                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs cursor-pointer">
+                Formatar
+              </button>
+            </div>
+          </div>
+
+          <textarea
+            rows="16"
+            [value]="rawJsonString()"
+            (input)="onJsonEditorChange($any($event.target).value)"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-cyan-200 leading-relaxed focus:outline-none focus:border-cyan-500 selection:bg-cyan-500/30">
+          </textarea>
+        </div>
+
+        <!-- CLI Output Simulator -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+              <mat-icon class="text-slate-400">terminal</mat-icon>
+              <span>Saída do Terminal CLI (Python arkhe_preflight_v21.py)</span>
+            </h3>
+            <button
+              type="button"
+              (click)="copyCliText()"
+              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs flex items-center gap-1 cursor-pointer">
+              <mat-icon class="text-xs">content_copy</mat-icon>
+              <span>Copiar Saída</span>
+            </button>
+          </div>
+          <pre class="bg-black/80 rounded-xl p-4 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed border border-slate-800">{{ generateCliOutput() }}</pre>
+        </div>
+      </div>
+    }
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-950/80 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2 font-mono">
+      <div>Arkhe Provenance Verifier · Especificação v21 · 11 out 2026</div>
+      <div>RFC 8785 Canonical JSON · C2PA JUMBF · Solana Program Memo v1</div>
+    </div>
+  </footer>
+</div>

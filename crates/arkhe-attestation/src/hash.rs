@@ -88,7 +88,10 @@ pub fn aggregate_hash(files: &[PathBuf], root: &Path) -> Result<DualHash> {
     for f in files {
         let h = hash_file(f)?;
         // Normaliza para caminhos relativos ao root, assim o hash não inclui /home/runner/...
-        let rel = f.strip_prefix(root).unwrap_or(f).display().to_string();
+        let mut rel = f.strip_prefix(root).unwrap_or(f).display().to_string();
+        if std::path::MAIN_SEPARATOR == '\\' {
+            rel = rel.replace('\\', "/");
+        }
         entries.push((rel, h));
     }
     entries.sort_by(|a, b| a.0.cmp(&b.0));

@@ -57,16 +57,33 @@ def collect_source_files() -> list[Path]:
     return sorted(files)
 
 
-def compute_source_hashes() -> dict[str, str]:
+def compute_source_hashes() -> dict[str, dict]:
     import hashlib
+    try:
+        import blake3
+        has_b3 = True
+    except ImportError:
+        has_b3 = False
+
     out = {}
     for f in collect_source_files():
         rel = f.relative_to(Path.cwd())
-        out[str(rel)] = hashlib.sha256(f.read_bytes()).hexdigest()
+        rel_str = str(rel).replace("\\", "/")
+        bytes_content = f.read_bytes()
+        sha256_hash = hashlib.sha256(bytes_content).hexdigest()
+
+        b3_hash = None
+        if has_b3:
+            b3_hash = blake3.blake3(bytes_content).hexdigest()
+
+        out[rel_str] = {
+            "sha256": sha256_hash,
+            "blake3": b3_hash
+        }
     return out
 
 
-def aggregate_hash(hashes: dict[str, str]) -> dict[str, str | None]:
+def aggregate_hash(hashes: dict[str, dict]) -> dict[str, str | None]:
     import hashlib
     try:
         import blake3
@@ -78,10 +95,17 @@ def aggregate_hash(hashes: dict[str, str]) -> dict[str, str | None]:
     b3 = blake3.blake3() if has_b3 else None
 
     for path in sorted(hashes):
-        line = f"{path}:{hashes[path]}\n"
+        hash_obj = hashes[path]
+        line = f"{path}:{hash_obj['sha256']}\n"
         sha.update(line.encode())
         if b3:
             b3.update(line.encode())
+
+        if hash_obj['blake3']:
+            line_b3 = f"{path}:{hash_obj['blake3']}\n"
+            sha.update(line_b3.encode())
+            if b3:
+                b3.update(line_b3.encode())
 
     return {
         "sha256": sha.hexdigest(),
