@@ -1,16 +1,16 @@
 {
-  "checked_at": "2026-10-10T21:18:36.008209+00:00",
-  "match": true,
-  "reason": "match",
-  "sha_match": true,
+  "checked_at": "2026-10-11T00:09:13.772045906+00:00",
+  "match_": false,
+  "reason": "unknown",
+  "sha_match": false,
   "blake3_match": true,
-  "report_hash": "79228e5b8b9eb276a590bccbde795006bb83b584cd7cf7256d2d96ff83d1abcc",
-  "current_hash": "79228e5b8b9eb276a590bccbde795006bb83b584cd7cf7256d2d96ff83d1abcc",
+  "report_hash": "9b5913034c4199445c2c49d8eb88fc6884da500b11e3ea5cbf2125e3d4ec6fc1",
+  "current_hash": "1a9f5560222ed4bd1bc59e15e75e5f6451ce41f06f1b340c5c9c6b53d349213b",
   "report_blake3": null,
-  "current_blake3": null,
+  "current_blake3": "c33b736509cfa913e39b816c694210a40d89010918f8a90173da503e78cb1aea",
   "diff": {
-    "added": [],
+    "changed": [],
     "missing": [],
-    "changed": []
+    "added": []
   }
 }

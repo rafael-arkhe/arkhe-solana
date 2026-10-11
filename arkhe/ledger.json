@@ -1,3 +1,44 @@
 {
-  "claims": {}
+  "claims": {
+    "graph::tests::bfs_depth_is_real_distance": {
+      "claim_id": "graph::tests::bfs_depth_is_real_distance",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "last_run": "2026-10-11T00:08:52.864969+00:00",
+      "depends_on": [],
+      "source_files": []
+    },
+    "graph::tests::severity_by_depth": {
+      "claim_id": "graph::tests::severity_by_depth",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "last_run": "2026-10-11T00:08:52.864969+00:00",
+      "depends_on": [],
+      "source_files": []
+    },
+    "graph::tests::cycles_detected": {
+      "claim_id": "graph::tests::cycles_detected",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "last_run": "2026-10-11T00:08:52.864969+00:00",
+      "depends_on": [],
+      "source_files": []
+    },
+    "hash::tests::aggregate_changes_with_content": {
+      "claim_id": "hash::tests::aggregate_changes_with_content",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "last_run": "2026-10-11T00:08:52.864969+00:00",
+      "depends_on": [],
+      "source_files": []
+    },
+    "hash::tests::aggregate_empty_is_deterministic": {
+      "claim_id": "hash::tests::aggregate_empty_is_deterministic",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "last_run": "2026-10-11T00:08:52.864969+00:00",
+      "depends_on": [],
+      "source_files": []
+    }
+  }
 }
