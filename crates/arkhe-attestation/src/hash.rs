@@ -87,6 +87,7 @@ pub fn aggregate_hash(files: &[PathBuf], root: &Path) -> Result<DualHash> {
     let mut entries: Vec<(String, DualHash)> = Vec::new();
     for f in files {
         let h = hash_file(f)?;
+        // Normaliza para caminhos relativos ao root, assim o hash não inclui /home/runner/...
         let rel = f.strip_prefix(root).unwrap_or(f).display().to_string();
         entries.push((rel, h));
     }
