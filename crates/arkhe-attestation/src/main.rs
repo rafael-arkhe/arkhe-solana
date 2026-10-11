@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use arkhe_attestation::graph::build_graph;
 use arkhe_attestation::hash::{compute_source_hashes, per_file_hashes};
 use arkhe_attestation::junit::parse_junit;
-use arkhe_attestation::types::{Claim, Diff, Freshness};
+use arkhe_attestation::types::{Diff, Freshness};
 use clap::{Parser, Subcommand};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -61,8 +61,9 @@ fn main() -> Result<()> {
         } => {
             let raw = std::fs::read_to_string(&ledger)
                 .with_context(|| format!("ledger não encontrado: {}", ledger.display()))?;
-            let claims: BTreeMap<String, Claim> =
+            let ledger_data: arkhe_attestation::types::Ledger =
                 serde_json::from_str(&raw).context("ledger JSON inválido")?;
+            let claims = ledger_data.claims;
 
             let graph = build_graph(&claims);
             if let Some(parent) = out.parent() {

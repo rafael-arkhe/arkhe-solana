@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -30,6 +31,11 @@ pub struct Claim {
 
 fn default_verification_source() -> String {
     "none".to_string()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Ledger {
+    pub claims: BTreeMap<String, Claim>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
