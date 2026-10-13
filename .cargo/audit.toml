@@ -14,9 +14,6 @@ ignore = [
     # quick-xml - multiple vulnerabilities - we only use this for parsing junit reports which we trust.
     "RUSTSEC-2026-0194",
     "RUSTSEC-2026-0195",
-    # RUSTSEC-2023-0071 | rsa: Marvin Attack timing sidechannel.
-    # Transitive dep of sqlx-mysql; project uses only the postgres feature
-    # so the mysql crate is never compiled into the binary.
-    # No fix available upstream. Re-evaluate: 2027-01-01.
+    # rsa - unpatched vulnerability (Re-evaluate by 2027-03-31)
     "RUSTSEC-2023-0071"
 ]
