@@ -8,11 +8,35 @@ use rmcp::{
 use serde_json::json;
 use std::time::Instant;
 use uuid::Uuid;
+use crate::metering::UsageLedgerPort;
+use crate::preflight::PreflightPort;
 
-impl ArkheMcp {
-    pub(crate) async fn verify_provenance_impl(
+use std::sync::Arc;
+use crate::server::ArkheMcpConfig;
+
+#[derive(Clone)]
+pub struct ProvenanceService {
+    pub ledger: Arc<dyn UsageLedgerPort>,
+    pub preflight: Arc<dyn PreflightPort>,
+    pub config: ArkheMcpConfig,
+}
+
+impl ProvenanceService {
+    pub fn new(
+        ledger: Arc<dyn UsageLedgerPort>,
+        preflight: Arc<dyn PreflightPort>,
+        config: ArkheMcpConfig,
+    ) -> Self {
+        Self {
+            ledger,
+            preflight,
+            config,
+        }
+    }
+
+    pub async fn verify(
         &self,
-        Parameters(args): Parameters<VerifyProvenanceArgs>,
+        args: VerifyProvenanceArgs,
     ) -> Result<CallToolResult, McpError> {
         if args.tenant_id.trim().is_empty() || args.idempotency_key.trim().is_empty() {
             return Err(McpError::invalid_params(
@@ -22,7 +46,7 @@ impl ArkheMcp {
         }
 
         match self
-            .usage
+            .ledger
             .seen_idempotency_key(&args.tenant_id, &args.idempotency_key)
             .await
         {
@@ -95,7 +119,7 @@ impl ArkheMcp {
             idempotency_key: args.idempotency_key,
             tenant_id: args.tenant_id,
             tool: "verify_provenance".to_owned(),
-            price_book_version: self.usage.price_book_version().to_owned(),
+            price_book_version: self.ledger.price_book_version().to_owned(),
             pricing_rule_id: "phase-a-free-verify-provenance-v1".to_owned(),
             sol_price_usd_at_event: self.config.sol_price_usd.clone(),
             started_at,
@@ -111,7 +135,7 @@ impl ArkheMcp {
             metadata,
         };
 
-        if let Err(e) = self.usage.append(&event).await {
+        if let Err(e) = self.ledger.append(&event).await {
             tracing::error!(error = ?e, request_id = %request_id, "usage ledger append failed");
             return Ok(CallToolResult::error(vec![ContentBlock::text(
                 "verification completed but metering commit failed; response withheld fail-closed",
@@ -119,5 +143,128 @@ impl ArkheMcp {
         }
 
         Ok(tool_result)
+    }
+}
+
+impl ArkheMcp {
+    pub(crate) async fn verify_provenance_impl(
+        &self,
+        Parameters(args): Parameters<VerifyProvenanceArgs>,
+    ) -> Result<CallToolResult, McpError> {
+        self.provenance_service.verify(args).await
+    }
+}
+
+#[cfg(test)]
+mod logic_tests {
+    use super::*;
+    use std::sync::Arc;
+    use crate::metering::{MockUsageLedgerPort, MeteringError};
+    use crate::preflight::{MockPreflightPort, VerifiedPreflightResponse, PreflightEvidence, VerifyProvenanceArgs, ReleaseGate};
+    use crate::server::ArkheMcpConfig;
+
+    fn test_config() -> ArkheMcpConfig {
+        ArkheMcpConfig {
+            sol_price_usd: Some("150".into()),
+            verify_cost_usd: Some("0".into()),
+            royalty_lookup_cost_usd: Some("0".into()),
+        }
+    }
+
+    fn valid_request() -> VerifyProvenanceArgs {
+        serde_json::from_value(serde_json::json!({
+            "tenant_id": "test_tenant",
+            "idempotency_key": "test_idem",
+            "report": { "content_hash": "c_hash", "script_sha256": "v_hash" },
+            "audio_a": { "url": "http://a", "expected_sha256": "a_hash" },
+            "audio_b": { "url": "http://b", "expected_sha256": "b_hash" },
+            "mode": "sanity"
+        })).unwrap()
+    }
+
+    fn valid_release_verified_report() -> VerifiedPreflightResponse {
+        VerifiedPreflightResponse {
+            evidence: PreflightEvidence {
+                result: "PASS".to_owned(),
+                mode: "sanity".to_owned(),
+                verifier_version: "23".to_owned(),
+                verifier_sha256: "v_hash".to_owned(),
+                content_hash: Some("c_hash".to_owned()),
+                envelope_hash: None,
+                release_gate: ReleaseGate { applied: false, passed: None, issues: vec![] },
+                hard_failures: 0,
+                checks: vec![],
+            },
+            wire_sha256: "w_hash".to_owned(),
+            wire_len: 1234,
+        }
+    }
+
+    #[tokio::test]
+    async fn successful_verification_is_withheld_when_metering_fails() {
+        let mut preflight = MockPreflightPort::new();
+
+        preflight
+            .expect_verify()
+            .times(1)
+            .returning(|_| {
+                Ok(valid_release_verified_report())
+            });
+
+        let mut ledger = MockUsageLedgerPort::new();
+
+        ledger
+            .expect_seen_idempotency_key()
+            .returning(|_, _| Ok(None));
+
+        ledger.expect_price_book_version().return_const("v1".to_owned());
+
+        ledger
+            .expect_append()
+            .times(1)
+            .returning(|_| {
+                Err(MeteringError::Unavailable)
+            });
+
+        let service = ProvenanceService::new(
+            Arc::new(ledger),
+            Arc::new(preflight),
+            test_config()
+        );
+
+        let result = service.verify(valid_request()).await;
+
+        let result = result.unwrap();
+        assert!(result.is_error.unwrap_or(false));
+
+        let error_text = serde_json::to_string(&result.content).unwrap();
+        assert!(error_text.contains("verification completed but metering commit failed; response withheld fail-closed"));
+    }
+
+    #[tokio::test]
+    async fn duplicate_execution_rejected() {
+        let mut preflight = MockPreflightPort::new();
+
+        preflight.expect_verify().times(0);
+
+        let mut ledger = MockUsageLedgerPort::new();
+
+        ledger
+            .expect_seen_idempotency_key()
+            .times(1)
+            .returning(|_, _| Ok(Some(uuid::Uuid::new_v4())));
+
+        let service = ProvenanceService::new(
+            Arc::new(ledger),
+            Arc::new(preflight),
+            test_config()
+        );
+
+        let result = service.verify(valid_request()).await;
+        let result = result.unwrap();
+        assert!(result.is_error.unwrap_or(false));
+
+        let error_text = serde_json::to_string(&result.content).unwrap();
+        assert!(error_text.contains("idempotency key already used"));
     }
 }

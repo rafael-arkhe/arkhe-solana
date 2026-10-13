@@ -149,10 +149,10 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let f = dir.path().join("a.rs");
         fs::write(&f, "fn main() {}").unwrap();
-        let h1 = aggregate_hash(&[f.clone()], dir.path()).unwrap();
+        let h1 = aggregate_hash(std::slice::from_ref(&f), dir.path()).unwrap();
 
         fs::write(&f, "fn main() { println!(); }").unwrap();
-        let h2 = aggregate_hash(&[f.clone()], dir.path()).unwrap();
+        let h2 = aggregate_hash(std::slice::from_ref(&f), dir.path()).unwrap();
 
         assert_ne!(h1.sha256, h2.sha256);
         assert_ne!(h1.blake3, h2.blake3);

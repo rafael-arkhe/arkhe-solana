@@ -87,6 +87,17 @@ pub struct VerifiedPreflightResponse {
     pub wire_len: usize,
 }
 
+use async_trait::async_trait;
+
+#[cfg(test)]
+use mockall::automock;
+
+#[cfg_attr(test, automock)]
+#[async_trait]
+pub trait PreflightPort: Send + Sync {
+    async fn verify(&self, args: &VerifyProvenanceArgs) -> anyhow::Result<VerifiedPreflightResponse>;
+}
+
 #[derive(Clone)]
 pub struct PreflightClient {
     client: Client,
@@ -105,7 +116,11 @@ impl PreflightClient {
         })
     }
 
-    pub async fn verify(&self, args: &VerifyProvenanceArgs) -> anyhow::Result<VerifiedPreflightResponse> {
+}
+
+#[async_trait]
+impl PreflightPort for PreflightClient {
+    async fn verify(&self, args: &VerifyProvenanceArgs) -> anyhow::Result<VerifiedPreflightResponse> {
         validate_request(args)?;
 
         let req = PreflightVerifyRequest {
