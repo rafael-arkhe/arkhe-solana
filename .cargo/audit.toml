@@ -13,5 +13,7 @@ ignore = [
     "RUSTSEC-2026-0097",
     # quick-xml - multiple vulnerabilities - we only use this for parsing junit reports which we trust.
     "RUSTSEC-2026-0194",
-    "RUSTSEC-2026-0195"
+    "RUSTSEC-2026-0195",
+    # rsa - unpatched vulnerability (Re-evaluate by 2027-03-31)
+    "RUSTSEC-2023-0071"
 ]
