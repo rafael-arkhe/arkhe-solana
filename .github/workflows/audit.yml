@@ -15,7 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Check for rsa in dependency tree
+        run: |
+          if cargo tree -i rsa 2>/dev/null | grep -q "rsa"; then
+            echo "rsa is in the dependency tree. Verify it's only a transitive non-compiled dependency."
+          fi
       - uses: rustsec/audit-check@v1.4.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          ignore: "RUSTSEC-2026-0258,RUSTSEC-2026-0174,RUSTSEC-2024-0384,RUSTSEC-2026-0097,RUSTSEC-2026-0194,RUSTSEC-2026-0195"
