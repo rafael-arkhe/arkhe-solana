@@ -1,13 +1,27 @@
 [package]
 name = "arkhe-provenance-mcp"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
+publish = false
+
+[[bin]]
+name = "arkhe-provenance-mcp"
+path = "src/main.rs"
 
 [dependencies]
-async_stripe = { version = "0.40", package = "async-stripe", features = ["runtime-tokio-hyper"] }
+anyhow = "1"
 axum = "0.8"
-http = "1.5.0"
-mpp = { version = "0.10.3", features = ["server", "stripe"] }
-serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.151"
-tokio = "1"
+chrono = { version = "0.4", features = ["serde"] }
+hex = "0.4"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+rmcp = { version = "3.5.1", features = ["server", "macros", "schemars", "transport-streamable-http-server"] }
+schemars = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "net", "time"] }
+tokio-util = "0.7"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+uuid = { version = "1", features = ["serde", "v4"] }
