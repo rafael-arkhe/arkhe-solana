@@ -1,7 +1,9 @@
+use std::sync::Arc;
 use crate::{
     metering::UsageLedger,
     preflight::{PreflightClient, VerifyProvenanceArgs},
     royalty::{RoyaltyStatusArgs, RoyaltyStore},
+    tools::provenance::ProvenanceService,
 };
 use rmcp::{handler::server::wrapper::Parameters, tool, tool_router};
 use sqlx::PgPool;
@@ -25,10 +27,10 @@ impl ArkheMcpConfig {
 
 #[derive(Clone)]
 pub struct ArkheMcp {
-    pub(crate) preflight: PreflightClient,
     pub(crate) royalties: RoyaltyStore,
     pub(crate) usage: UsageLedger,
     pub(crate) config: ArkheMcpConfig,
+    pub(crate) provenance_service: ProvenanceService,
 }
 
 impl ArkheMcp {
@@ -38,11 +40,20 @@ impl ArkheMcp {
         price_book_version: impl Into<String>,
         config: ArkheMcpConfig,
     ) -> anyhow::Result<Self> {
+        let usage = UsageLedger::new(pool.clone(), price_book_version);
+        let preflight = PreflightClient::new(preflight_base_url)?;
+
+        let provenance_service = ProvenanceService::new(
+            Arc::new(usage.clone()),
+            Arc::new(preflight),
+            config.clone(),
+        );
+
         Ok(Self {
-            preflight: PreflightClient::new(preflight_base_url)?,
-            royalties: RoyaltyStore::new(pool.clone()),
-            usage: UsageLedger::new(pool, price_book_version),
+            royalties: RoyaltyStore::new(pool),
+            usage,
             config,
+            provenance_service,
         })
     }
 }

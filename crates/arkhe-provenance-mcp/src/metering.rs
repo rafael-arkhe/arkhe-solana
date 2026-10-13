@@ -26,7 +26,32 @@ pub struct UsageEvent {
     pub metadata: Value,
 }
 
-#[derive(Clone)]
+#[derive(Debug, thiserror::Error)]
+pub enum MeteringError {
+    #[error("database error: {0}")]
+    Database(#[from] sqlx::Error),
+    #[error("metering unavailable")]
+    Unavailable,
+}
+
+#[cfg(test)]
+use mockall::automock;
+
+#[cfg_attr(test, automock)]
+#[async_trait::async_trait]
+pub trait UsageLedgerPort: Send + Sync + std::fmt::Debug {
+    async fn append(&self, event: &UsageEvent) -> Result<(), MeteringError>;
+
+    async fn seen_idempotency_key(
+        &self,
+        tenant_id: &str,
+        idempotency_key: &str,
+    ) -> Result<Option<Uuid>, MeteringError>;
+
+    fn price_book_version(&self) -> &str;
+}
+
+#[derive(Clone, std::fmt::Debug)]
 pub struct UsageLedger {
     pool: PgPool,
     price_book_version: String,
@@ -39,12 +64,15 @@ impl UsageLedger {
             price_book_version: price_book_version.into(),
         }
     }
+}
 
-    pub fn price_book_version(&self) -> &str {
+#[async_trait::async_trait]
+impl UsageLedgerPort for UsageLedger {
+    fn price_book_version(&self) -> &str {
         &self.price_book_version
     }
 
-    pub async fn append(&self, event: &UsageEvent) -> Result<(), sqlx::Error> {
+    async fn append(&self, event: &UsageEvent) -> Result<(), MeteringError> {
         sqlx::query(
             r#"
             INSERT INTO usage_events (
@@ -85,11 +113,11 @@ impl UsageLedger {
         Ok(())
     }
 
-    pub async fn seen_idempotency_key(
+    async fn seen_idempotency_key(
         &self,
         tenant_id: &str,
         idempotency_key: &str,
-    ) -> Result<Option<Uuid>, sqlx::Error> {
+    ) -> Result<Option<Uuid>, MeteringError> {
         let row = sqlx::query(
             "SELECT request_id FROM usage_events WHERE tenant_id = $1 AND idempotency_key = $2 LIMIT 1",
         )
