@@ -1,0 +1,13 @@
+792d23cae5bcc065b19d1506b2522c3cbcf7f211ed4430f7ce7129e537dac376  ./.cargo/audit.toml
+f89bcbaec4e701193c9bc86e768f5147e7be852efce0f5f9953541f5640929da  ./HOW_TO_AUDIT.md
+293e0a556a4147de59adf54ee02f1042bbbb2562e655da5ed234097ee4c8299a  ./README_APPLY.md
+f0318799b47716ef2d5f2a2c1bba2cf6746578b88ecc079e09da737a99fdc80b  ./crates/arkhe-provenance-mcp/Cargo.toml
+c34c490fe07c7936b86b4e1daf138fb10a280cb90584512a098f46d89d2f82ed  ./crates/arkhe-provenance-mcp/src/lib.rs
+59e173481e452dda0d03f5d25475a91fb40af1f4c759cb08555dd7df2448efc2  ./crates/arkhe-provenance-mcp/src/metering.rs
+a93370fccf1893b30a4af88f68ccda98c163aa987e7d984bca8637c4d4fccd09  ./crates/arkhe-provenance-mcp/src/preflight.rs
+8fd4781307f50bc03b870055c944aaebd63b2866c751e399601da11ad562eb98  ./crates/arkhe-provenance-mcp/src/tools/mod.rs
+7f6388c5d174dbd15d5dd63efe87432f342c458e9f5bed59857e9a92b5109891  ./crates/arkhe-provenance-mcp/src/tools/provenance.rs
+04ea0431e7d03be41f139309271ad8fb85faa363d7a694312980a2f477dc0f91  ./crates/arkhe-provenance-mcp/tests/integration_invariants.rs
+3aa780ef8b81216c5ebcb38e490fab5c29cb68a57fe2a464e2271b0bcac6300d  ./crates/arkhe-provenance-mcp/tests/postgres_invariants.rs
+71824d367dba395956de0168a007f88390b4779c94759b927140230b5726d1c2  ./database/migrations/003_phase_a_metering.sql
+cf888658bbf0f54031e9ac7925823305d4350b5464fb9277546efd76a653188f  ./docs/security/RUSTSEC-2023-0071.md

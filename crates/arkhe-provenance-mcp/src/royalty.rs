@@ -1,4 +1,4 @@
-use schemars::JsonSchema;
+use rmcp::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{PgPool, Row};
