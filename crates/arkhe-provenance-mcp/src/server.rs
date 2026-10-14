@@ -1,9 +1,9 @@
 use std::sync::Arc;
 use crate::{
     metering::UsageLedger,
-    preflight::{PreflightClient, VerifyProvenanceArgs},
+    preflight::HttpPreflightClient,
     royalty::{RoyaltyStatusArgs, RoyaltyStore},
-    tools::provenance::ProvenanceService,
+    tools::provenance::{ProvenanceService, VerifyProvenanceRequest},
 };
 use rmcp::{handler::server::wrapper::Parameters, tool, tool_router};
 use sqlx::PgPool;
@@ -28,8 +28,8 @@ impl ArkheMcpConfig {
 #[derive(Clone)]
 pub struct ArkheMcp {
     pub(crate) royalties: RoyaltyStore,
-    pub(crate) usage: UsageLedger,
-    pub(crate) config: ArkheMcpConfig,
+    // pub(crate) usage: UsageLedger,
+    // pub(crate) _config: ArkheMcpConfig,
     pub(crate) provenance_service: ProvenanceService,
 }
 
@@ -37,22 +37,21 @@ impl ArkheMcp {
     pub fn new(
         pool: PgPool,
         preflight_base_url: impl Into<String>,
-        price_book_version: impl Into<String>,
-        config: ArkheMcpConfig,
+        _price_book_version: impl Into<String>,
+        _config: ArkheMcpConfig,
     ) -> anyhow::Result<Self> {
-        let usage = UsageLedger::new(pool.clone(), price_book_version);
-        let preflight = PreflightClient::new(preflight_base_url)?;
+        let usage = UsageLedger::new(pool.clone());
+        let preflight = HttpPreflightClient::new(preflight_base_url)?;
 
         let provenance_service = ProvenanceService::new(
             Arc::new(usage.clone()),
             Arc::new(preflight),
-            config.clone(),
         );
 
         Ok(Self {
             royalties: RoyaltyStore::new(pool),
-            usage,
-            config,
+            // usage,
+            // config,
             provenance_service,
         })
     }
@@ -63,16 +62,22 @@ impl ArkheMcp {
     #[tool(description = "Verify an Arkhe provenance report using the hardened internal preflight verifier. This tool verifies only; it does not anchor or settle anything.")]
     async fn verify_provenance(
         &self,
-        params: Parameters<VerifyProvenanceArgs>,
+        Parameters(req): Parameters<VerifyProvenanceRequest>,
     ) -> Result<rmcp::model::CallToolResult, rmcp::ErrorData> {
-        self.verify_provenance_impl(params).await
+        let response = self.provenance_service.verify(req).await.map_err(|e| rmcp::ErrorData::new(rmcp::model::ErrorCode(0), e.to_string(), None))?;
+        Ok(rmcp::model::CallToolResult::success(vec![
+            rmcp::model::ContentBlock::text(serde_json::to_string(&response).unwrap())
+        ]))
     }
 
     #[tool(description = "Read the current royalty status for an Arkhe work by UUID or BLAKE3 hash. This is a read-only lookup and does not settle royalties.")]
     async fn get_royalty_status(
         &self,
-        params: Parameters<RoyaltyStatusArgs>,
+        Parameters(req): Parameters<RoyaltyStatusArgs>,
     ) -> Result<rmcp::model::CallToolResult, rmcp::ErrorData> {
-        self.get_royalty_status_impl(params).await
+        let response = self.royalties.get(&req.work_id).await.map_err(|e| rmcp::ErrorData::new(rmcp::model::ErrorCode(0), e.to_string(), None))?;
+        Ok(rmcp::model::CallToolResult::success(vec![
+            rmcp::model::ContentBlock::text(serde_json::to_string(&response).unwrap())
+        ]))
     }
 }

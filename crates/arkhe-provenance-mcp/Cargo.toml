@@ -1,34 +1,39 @@
 [package]
 name = "arkhe-provenance-mcp"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 publish = false
 
-[[bin]]
-name = "arkhe-provenance-mcp"
-path = "src/main.rs"
-
 [dependencies]
 anyhow = "1"
-async-trait = "0.1.92"
-axum = "0.8"
+async-trait = "0.1"
+axum = "0.8.9"
 chrono = { version = "0.4", features = ["serde"] }
-hex = "0.4"
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
-rmcp = { version = "3.5.1", features = ["server", "macros", "schemars", "transport-streamable-http-server"] }
-schemars = "1"
+reqwest = { version = "0.12", default-features = true, features = ["json"] }
+rmcp = { version = "3.5.1", features = ["server", "transport-streamable-http-server", "transport-streamable-http-server-session", "schemars"] }
+rust_decimal = { version = "1", features = ["serde"] }
+schemars = "1.2.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
-sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
-thiserror = "2.0.21"
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "net", "time"] }
-tokio-util = "0.7"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+sqlx = { version = "0.8", default-features = false, features = [
+  "runtime-tokio-native-tls",
+  "postgres",
+  "uuid",
+  "chrono",
+  "rust_decimal",
+] }
+thiserror = "2"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }
+tokio-util = "0.7.20"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 
 [dev-dependencies]
-async-trait = "0.1.92"
-mockall = "0.15.0"
-postgresql_embedded = { version = "0.21.0", features = ["tokio"] }
+anyhow = "1"
+mockall = "0.13"
+postgresql_embedded = { version = "0.21", features = ["tokio"] }
+
+[lints.rust]
+unsafe_code = "forbid"

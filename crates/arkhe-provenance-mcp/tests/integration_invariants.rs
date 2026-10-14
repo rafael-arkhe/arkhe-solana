@@ -1,180 +1,175 @@
+use arkhe_provenance_mcp::metering::{
+    ExistingUsage, MeteringError, UsageEvent, UsageLedgerPort,
+};
+use arkhe_provenance_mcp::preflight::{
+    PreflightCheck, PreflightError, PreflightEvidence, PreflightPort, PreflightRequest,
+    VerifiedPreflight,
+};
+use arkhe_provenance_mcp::tools::provenance::{
+    ProvenanceError, ProvenanceService, VerifyProvenanceRequest,
+};
+use async_trait::async_trait;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
-use arkhe_provenance_mcp::metering::{UsageLedgerPort, UsageEvent, MeteringError};
-use arkhe_provenance_mcp::preflight::{PreflightPort, VerifyProvenanceArgs, VerifiedPreflightResponse, PreflightEvidence, ReleaseGate};
-use arkhe_provenance_mcp::server::ArkheMcpConfig;
-use arkhe_provenance_mcp::tools::provenance::ProvenanceService;
-use async_trait::async_trait;
 
-#[derive(Debug, Clone)]
+#[derive(Default)]
+struct FakeLedgerState {
+    existing: Option<ExistingUsage>,
+    appended: Vec<UsageEvent>,
+    append_error: Option<String>,
+    find_calls: usize,
+}
+
+#[derive(Clone, Default)]
 struct FakeUsageLedger {
-    pub fail_append: bool,
-    pub existing_idempotency: Option<Uuid>,
-    pub appended_events: Arc<Mutex<Vec<UsageEvent>>>,
+    state: Arc<Mutex<FakeLedgerState>>,
 }
 
 impl FakeUsageLedger {
-    fn new(fail_append: bool, existing_idempotency: Option<Uuid>) -> Self {
+    fn with_append_failure(message: &str) -> Self {
+        let state = FakeLedgerState {
+            append_error: Some(message.to_owned()),
+            ..Default::default()
+        };
         Self {
-            fail_append,
-            existing_idempotency,
-            appended_events: Arc::new(Mutex::new(Vec::new())),
+            state: Arc::new(Mutex::new(state)),
         }
+    }
+
+    fn with_existing() -> Self {
+        let state = FakeLedgerState {
+            existing: Some(ExistingUsage {
+                request_id: Uuid::new_v4(),
+                request_digest: "existing".into(),
+            }),
+            ..Default::default()
+        };
+        Self {
+            state: Arc::new(Mutex::new(state)),
+        }
+    }
+
+    fn appended_count(&self) -> usize {
+        self.state.lock().unwrap().appended.len()
     }
 }
 
 #[async_trait]
 impl UsageLedgerPort for FakeUsageLedger {
-    async fn append(&self, event: &UsageEvent) -> Result<(), MeteringError> {
-        if self.fail_append {
-            return Err(MeteringError::Unavailable);
-        }
-        self.appended_events.lock().unwrap().push(event.clone());
-        Ok(())
-    }
-
-    async fn seen_idempotency_key(
+    async fn find_idempotency(
         &self,
         _tenant_id: &str,
         _idempotency_key: &str,
-    ) -> Result<Option<Uuid>, MeteringError> {
-        Ok(self.existing_idempotency)
+    ) -> Result<Option<ExistingUsage>, MeteringError> {
+        let mut state = self.state.lock().unwrap();
+        state.find_calls += 1;
+        Ok(state.existing.clone())
     }
 
-    fn price_book_version(&self) -> &str {
-        "v1-fake"
+    async fn append(&self, event: UsageEvent) -> Result<(), MeteringError> {
+        let mut state = self.state.lock().unwrap();
+        if let Some(message) = &state.append_error {
+            return Err(MeteringError::Unavailable(message.clone()));
+        }
+        state.appended.push(event);
+        Ok(())
     }
 }
 
-#[derive(Clone)]
+#[derive(Default)]
+struct FakePreflightState {
+    calls: usize,
+    error: Option<String>,
+}
+
+#[derive(Clone, Default)]
 struct FakePreflight {
-    pub response: Result<VerifiedPreflightResponse, String>,
-    pub call_count: Arc<Mutex<usize>>,
+    state: Arc<Mutex<FakePreflightState>>,
 }
 
 impl FakePreflight {
-    fn new(response: Result<VerifiedPreflightResponse, String>) -> Self {
-        Self {
-            response,
-            call_count: Arc::new(Mutex::new(0)),
+    fn calls(&self) -> usize {
+        self.state.lock().unwrap().calls
+    }
+
+    fn pass() -> VerifiedPreflight {
+        let evidence = PreflightEvidence {
+            result: "PASS".into(),
+            mode: "release".into(),
+            verifier_version: "v23".into(),
+            verifier_sha256: "a".repeat(64),
+            content_hash: "abc".into(),
+            envelope_hash: Some("b".repeat(64)),
+            hard_failures: 0,
+            checks: vec![PreflightCheck {
+                id: "I1".into(),
+                passed: true,
+            }],
+        };
+        let raw_response = serde_json::to_vec(&evidence).unwrap();
+        VerifiedPreflight {
+            evidence,
+            raw_response,
         }
     }
 }
 
 #[async_trait]
 impl PreflightPort for FakePreflight {
-    async fn verify(&self, _args: &VerifyProvenanceArgs) -> anyhow::Result<VerifiedPreflightResponse> {
-        *self.call_count.lock().unwrap() += 1;
-        match &self.response {
-            Ok(res) => Ok(res.clone()),
-            Err(e) => anyhow::bail!("{}", e),
+    async fn verify(&self, _request: PreflightRequest) -> Result<VerifiedPreflight, PreflightError> {
+        let mut state = self.state.lock().unwrap();
+        state.calls += 1;
+        if let Some(message) = &state.error {
+            return Err(PreflightError::Transport(message.clone()));
         }
+        Ok(Self::pass())
     }
 }
 
-fn test_config() -> ArkheMcpConfig {
-    ArkheMcpConfig {
-        sol_price_usd: Some("150".into()),
-        verify_cost_usd: Some("0".into()),
-        royalty_lookup_cost_usd: Some("0".into()),
-    }
-}
-
-fn valid_request() -> VerifyProvenanceArgs {
-    serde_json::from_value(serde_json::json!({
-        "tenant_id": "test_tenant",
-        "idempotency_key": "test_idem",
-        "report": { "content_hash": "c_hash", "script_sha256": "v_hash" },
-        "audio_a": { "url": "http://a", "expected_sha256": "a_hash" },
-        "audio_b": { "url": "http://b", "expected_sha256": "b_hash" },
-        "mode": "sanity"
-    })).unwrap()
-}
-
-fn valid_release_verified_report() -> VerifiedPreflightResponse {
-    VerifiedPreflightResponse {
-        evidence: PreflightEvidence {
-            result: "PASS".to_owned(),
-            mode: "sanity".to_owned(),
-            verifier_version: "23".to_owned(),
-            verifier_sha256: "v_hash".to_owned(),
-            content_hash: Some("c_hash".to_owned()),
-            envelope_hash: None,
-            release_gate: ReleaseGate { applied: false, passed: None, issues: vec![] },
-            hard_failures: 0,
-            checks: vec![],
-        },
-        wire_sha256: "w_hash".to_owned(),
-        wire_len: 1234,
+fn request() -> VerifyProvenanceRequest {
+    VerifyProvenanceRequest {
+        tenant_id: "integration-tenant".into(),
+        idempotency_key: "integration-idem".into(),
+        report: serde_json::json!({"content_hash": "abc"}),
+        mode: "release".into(),
+        online: true,
+        c2pa_a: Some("a".into()),
+        c2pa_b: Some("b".into()),
     }
 }
 
 #[tokio::test]
-async fn successful_verification_is_withheld_when_metering_fails() {
-    let preflight = FakePreflight::new(Ok(valid_release_verified_report()));
-    let ledger = FakeUsageLedger::new(true, None);
+async fn public_behavior_success_commits_usage_event() {
+    let ledger = FakeUsageLedger::default();
+    let preflight = FakePreflight::default();
+    let service = ProvenanceService::new(Arc::new(ledger.clone()), Arc::new(preflight.clone()));
 
-    let service = ProvenanceService::new(
-        Arc::new(ledger.clone()),
-        Arc::new(preflight.clone()),
-        test_config()
-    );
+    let response = service.verify(request()).await.unwrap();
 
-    let result = service.verify(valid_request()).await.unwrap();
-
-    assert!(result.is_error.unwrap_or(false));
-    let error_text = serde_json::to_string(&result.content).unwrap();
-    assert!(error_text.contains("metering commit failed; response withheld fail-closed"));
-
-    // Verify preflight was called
-    assert_eq!(*preflight.call_count.lock().unwrap(), 1);
-
-    // Verify no events were appended due to failure state
-    assert!(ledger.appended_events.lock().unwrap().is_empty());
+    assert_eq!(response.result, "PASS");
+    assert_eq!(ledger.appended_count(), 1);
+    assert_eq!(preflight.calls(), 1);
 }
 
 #[tokio::test]
-async fn duplicate_execution_rejected() {
-    let preflight = FakePreflight::new(Ok(valid_release_verified_report()));
-    let ledger = FakeUsageLedger::new(false, Some(uuid::Uuid::new_v4()));
+async fn public_behavior_metering_failure_is_fail_closed() {
+    let ledger = FakeUsageLedger::with_append_failure("ledger unavailable");
+    let preflight = FakePreflight::default();
+    let service = ProvenanceService::new(Arc::new(ledger), Arc::new(preflight));
 
-    let service = ProvenanceService::new(
-        Arc::new(ledger.clone()),
-        Arc::new(preflight.clone()),
-        test_config()
-    );
+    let result = service.verify(request()).await;
 
-    let result = service.verify(valid_request()).await.unwrap();
-
-    assert!(result.is_error.unwrap_or(false));
-    let error_text = serde_json::to_string(&result.content).unwrap();
-    assert!(error_text.contains("idempotency key already used"));
-
-    // Verify preflight was NEVER called
-    assert_eq!(*preflight.call_count.lock().unwrap(), 0);
+    assert!(matches!(result, Err(ProvenanceError::Metering(_))));
 }
 
 #[tokio::test]
-async fn valid_verification_succeeds_and_meters() {
-    let preflight = FakePreflight::new(Ok(valid_release_verified_report()));
-    let ledger = FakeUsageLedger::new(false, None);
+async fn public_behavior_duplicate_idempotency_does_not_execute_preflight() {
+    let ledger = FakeUsageLedger::with_existing();
+    let preflight = FakePreflight::default();
+    let service = ProvenanceService::new(Arc::new(ledger), Arc::new(preflight.clone()));
 
-    let service = ProvenanceService::new(
-        Arc::new(ledger.clone()),
-        Arc::new(preflight.clone()),
-        test_config()
-    );
+    let result = service.verify(request()).await;
 
-    let result = service.verify(valid_request()).await.unwrap();
-
-    assert!(!result.is_error.unwrap_or(false));
-
-    // Verify preflight was called
-    assert_eq!(*preflight.call_count.lock().unwrap(), 1);
-
-    // Verify event was appended
-    let events = ledger.appended_events.lock().unwrap();
-    assert_eq!(events.len(), 1);
-    assert_eq!(events[0].tool, "verify_provenance");
-    assert_eq!(events[0].result, "PASS");
+    assert!(matches!(result, Err(ProvenanceError::DuplicateRequest)));
+    assert_eq!(preflight.calls(), 0);
 }

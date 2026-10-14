@@ -1,127 +1,100 @@
-use sqlx::PgPool;
-use postgresql_embedded::PostgreSQL;
+use postgresql_embedded::{PostgreSQL, SettingsBuilder};
+use rust_decimal::Decimal;
+use sqlx::{PgPool, Row};
+use uuid::Uuid;
 
-#[tokio::test]
-async fn test_idempotency_constraint() {
-    let mut postgresql = PostgreSQL::default();
-    // increase timeout to give it enough time to setup on slow runners
-    postgresql.setup().await.expect("setup failed");
-    postgresql.start().await.expect("start failed");
+async fn temporary_postgres() -> anyhow::Result<(PostgreSQL, PgPool)> {
+    let settings = SettingsBuilder::new()
+        .host("127.0.0.1")
+        .port(0)
+        .username("postgres")
+        .password("arkhe-test")
+        .temporary(true)
+        .build();
 
-    let uri = postgresql.settings().url("postgres");
+    let mut postgres = PostgreSQL::new(settings);
+    postgres.setup().await?;
+    postgres.start().await?;
+    postgres.create_database("arkhe_test").await?;
 
-    let pool = PgPool::connect(&uri).await.unwrap();
+    let database_url = postgres.settings().url("arkhe_test");
+    let pool = PgPool::connect(&database_url).await?;
 
-    let migration = std::fs::read_to_string("../../crates/arkhe-core/migrations/003_phase_a_metering.sql").unwrap();
+    sqlx::raw_sql(include_str!(
+        "../../../database/migrations/003_phase_a_metering.sql"
+    ))
+    .execute(&pool)
+    .await?;
 
-    // Create missing 'works' table since migration 003 relies on it
+    Ok((postgres, pool))
+}
+
+async fn insert_usage(pool: &PgPool, idempotency_key: &str) -> anyhow::Result<Uuid> {
+    let request_id = Uuid::new_v4();
     sqlx::query(
         r#"
-        CREATE TABLE IF NOT EXISTS works (
-            uuid UUID PRIMARY KEY
-        );
-        "#
-    ).execute(&pool).await.unwrap();
-
-    // Split the migration on semicolons to execute commands individually
-    let mut statements = Vec::new();
-    let mut current_statement = String::new();
-    let mut in_dollar_quote = false;
-
-    for line in migration.lines() {
-        if line.contains("$$") {
-            in_dollar_quote = !in_dollar_quote;
-        }
-        current_statement.push_str(line);
-        current_statement.push('\n');
-
-        if line.trim().ends_with(';') && !in_dollar_quote {
-            statements.push(current_statement.clone());
-            current_statement.clear();
-        }
-    }
-
-    for stmt in statements {
-        let stmt = stmt.trim();
-        if !stmt.is_empty() {
-            sqlx::query(stmt).execute(&pool).await.unwrap();
-        }
-    }
-
-    // Insert first event
-    sqlx::query(
-        "INSERT INTO usage_events (request_id, tenant_id, idempotency_key, tool, price_book_version, pricing_rule_id, started_at, duration_ms, bytes_in, bytes_out, result, billable_units, billable_amount_usd)
-         VALUES (gen_random_uuid(), 't1', 'k1', 'verify_provenance', 'v1', 'r1', NOW(), 1, 1, 1, 'success', 1, 0)"
-    ).execute(&pool).await.unwrap();
-
-    // Second insert with same (tenant_id, idempotency_key) must fail
-    let result = sqlx::query(
-        "INSERT INTO usage_events (request_id, tenant_id, idempotency_key, tool, price_book_version, pricing_rule_id, started_at, duration_ms, bytes_in, bytes_out, result, billable_units, billable_amount_usd)
-         VALUES (gen_random_uuid(), 't1', 'k1', 'verify_provenance', 'v1', 'r1', NOW(), 1, 1, 1, 'success', 1, 0)"
-    ).execute(&pool).await;
-
-    assert!(result.is_err(), "duplicate idempotency key must be rejected");
+        INSERT INTO usage_events (
+            request_id, idempotency_key, request_digest, tenant_id,
+            tool, tool_version, price_book_version, pricing_rule_id,
+            started_at, duration_ms, bytes_in, bytes_out,
+            execution_status, domain_outcome, verification_level,
+            estimated_cost_usd, billable_units, billable_amount_usd,
+            evidence_hash, metadata
+        ) VALUES (
+            $1,$2,$3,$4,$5,$6,$7,$8,
+            NOW(),10,100,200,$9,$10,$11,
+            NULL,1,$12,$13,$14
+        )
+        "#,
+    )
+    .bind(request_id)
+    .bind(idempotency_key)
+    .bind("a".repeat(64))
+    .bind("tenant-a")
+    .bind("verify_provenance")
+    .bind("0.2.1")
+    .bind("phase-a-free-v1")
+    .bind("phase-a-free-verify")
+    .bind("completed")
+    .bind("PASS")
+    .bind("release")
+    .bind(Decimal::ZERO)
+    .bind("b".repeat(64))
+    .bind(serde_json::json!({"phase":"A"}))
+    .execute(pool)
+    .await?;
+    Ok(request_id)
 }
 
 #[tokio::test]
-async fn test_append_only_ledger() {
-    let mut postgresql = PostgreSQL::default();
-    // increase timeout to give it enough time to setup on slow runners
-    postgresql.setup().await.expect("setup failed");
-    postgresql.start().await.expect("start failed");
+async fn usage_events_are_append_only_and_idempotent() -> anyhow::Result<()> {
+    let (postgres, pool) = temporary_postgres().await?;
 
-    let uri = postgresql.settings().url("postgres");
+    let request_id = insert_usage(&pool, "idem-001").await?;
 
-    let pool = PgPool::connect(&uri).await.unwrap();
+    let count: i64 = sqlx::query("SELECT COUNT(*) AS count FROM usage_events WHERE request_id = $1")
+        .bind(request_id)
+        .fetch_one(&pool)
+        .await?
+        .get("count");
+    assert_eq!(count, 1);
 
-    let migration = std::fs::read_to_string("../../crates/arkhe-core/migrations/003_phase_a_metering.sql").unwrap();
+    let update = sqlx::query("UPDATE usage_events SET duration_ms = 999 WHERE request_id = $1")
+        .bind(request_id)
+        .execute(&pool)
+        .await;
+    assert!(update.is_err(), "UPDATE unexpectedly succeeded");
 
-    // Create missing 'works' table since migration 003 relies on it
-    sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS works (
-            uuid UUID PRIMARY KEY
-        );
-        "#
-    ).execute(&pool).await.unwrap();
+    let delete = sqlx::query("DELETE FROM usage_events WHERE request_id = $1")
+        .bind(request_id)
+        .execute(&pool)
+        .await;
+    assert!(delete.is_err(), "DELETE unexpectedly succeeded");
 
-    let mut statements = Vec::new();
-    let mut current_statement = String::new();
-    let mut in_dollar_quote = false;
+    let duplicate = insert_usage(&pool, "idem-001").await;
+    assert!(duplicate.is_err(), "duplicate idempotency unexpectedly succeeded");
 
-    for line in migration.lines() {
-        if line.contains("$$") {
-            in_dollar_quote = !in_dollar_quote;
-        }
-        current_statement.push_str(line);
-        current_statement.push('\n');
-
-        if line.trim().ends_with(';') && !in_dollar_quote {
-            statements.push(current_statement.clone());
-            current_statement.clear();
-        }
-    }
-
-    for stmt in statements {
-        let stmt = stmt.trim();
-        if !stmt.is_empty() {
-            sqlx::query(stmt).execute(&pool).await.unwrap();
-        }
-    }
-
-    // Insert an event to mutate
-    sqlx::query(
-        "INSERT INTO usage_events (request_id, tenant_id, idempotency_key, tool, price_book_version, pricing_rule_id, started_at, duration_ms, bytes_in, bytes_out, result, billable_units, billable_amount_usd)
-         VALUES (gen_random_uuid(), 't1', 'k1', 'verify_provenance', 'v1', 'r1', NOW(), 1, 1, 1, 'success', 1, 0)"
-    ).execute(&pool).await.unwrap();
-
-    // UPDATE must fail
-    let update = sqlx::query("UPDATE usage_events SET tool = 'x'")
-        .execute(&pool).await;
-    assert!(update.is_err(), "UPDATE on usage_events must be rejected");
-
-    // DELETE must fail
-    let delete = sqlx::query("DELETE FROM usage_events")
-        .execute(&pool).await;
-    assert!(delete.is_err(), "DELETE on usage_events must be rejected");
+    pool.close().await;
+    postgres.stop().await?;
+    Ok(())
 }
