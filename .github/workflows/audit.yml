@@ -20,6 +20,7 @@ jobs:
           if cargo tree -i rsa 2>/dev/null | grep -q "rsa"; then
             echo "rsa is in the dependency tree. Verify it's only a transitive non-compiled dependency."
           fi
-      - uses: rustsec/audit-check@v1.4.1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@cargo-audit
+      - name: Run cargo audit
+        run: cargo audit
