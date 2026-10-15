@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-10-15T17:18:17.013343470+00:00",
+  "nodes": [
+    {
+      "id": "duplicate_execution_rejected",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "graph::tests::bfs_depth_is_real_distance",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "graph::tests::cycles_detected",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "graph::tests::severity_by_depth",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "hash::tests::aggregate_changes_with_content",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "hash::tests::aggregate_empty_is_deterministic",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "preflight::tests::duplicate_check_ids_are_rejected",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "preflight::tests::pass_binds_content_hash",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "preflight::tests::pass_binds_verifier_hash",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "preflight::tests::release_pass_requires_some_true",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "preflight::tests::sanity_rejects_applied_release_gate",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "successful_verification_is_withheld_when_metering_fails",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "test_append_only_ledger",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "test_idempotency_constraint",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "tools::provenance::logic_tests::duplicate_execution_rejected",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "tools::provenance::logic_tests::successful_verification_is_withheld_when_metering_fails",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    },
+    {
+      "id": "valid_verification_succeeds_and_meters",
+      "status": "verified",
+      "verification_source": "cargo-test",
+      "falsifier": null,
+      "source_files": []
+    }
+  ],
+  "edges": [],
+  "cycles": [],
+  "propagated_compromised": [],
+  "max_depth": 0
+}
