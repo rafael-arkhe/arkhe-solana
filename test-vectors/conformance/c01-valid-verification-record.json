@@ -1,0 +1,56 @@
+{
+  "vector_id": "C01",
+  "vector_version": 1,
+  "category": "conformance",
+  "description": "Valid VerificationRecord",
+  "normative_inputs": {
+    "intent_digest": {
+      "bytes": "c01_intent_digest_dummy_bytes___"
+    },
+    "claim_refs": ["c1"],
+    "verifier": {
+      "principal": { "scheme": "did", "value": "did:example:verifier1" },
+      "authority_domain": "example.com",
+      "verifier_class": "test",
+      "key_ref": { "scheme": "key", "value": "key1" }
+    },
+    "verification_method": {
+      "kind": "executable",
+      "tool_identity": { "scheme": "urn", "value": "urn:tool:test" },
+      "tool_version": "1.0",
+      "target_scope": { "kind": "component", "value": "test" },
+      "expected_result": { "kind": "bool", "value": true },
+      "actual_result": { "kind": "bool", "value": true }
+    },
+    "evidence": [
+      {
+        "evidence_class": "test-report",
+        "content_digest": "c01_evidence_digest_dummy_bytes_"
+      }
+    ],
+    "result": {
+      "verdict": "PASS",
+      "findings": []
+    },
+    "evaluation_context": {
+      "branch_ref": "main",
+      "base_frontier_digest": "c01_frontier_digest_dummy_bytes_",
+      "composed_intents": [],
+      "dependency_closure": [],
+      "property_refs": [
+        { "name": "test_prop", "version": 1 }
+      ],
+      "scopes": [
+        { "kind": "component", "value": "test" }
+      ],
+      "policy_version": { "policy_id": "test-policy", "version": 1 },
+      "environment": {
+        "environment_version": 1,
+        "environment_digest": "c01_env_digest_dummy_bytes______"
+      },
+      "verifier_inputs_digest": "c01_inputs_digest_dummy_bytes___"
+    },
+    "issued_at": 1697328000,
+    "policy_ref": { "policy_id": "test-policy", "version": 1 }
+  }
+}
