@@ -11,6 +11,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Run tests (nextest)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cargo install cargo-nextest --locked
           cargo nextest run --workspace --profile ci
