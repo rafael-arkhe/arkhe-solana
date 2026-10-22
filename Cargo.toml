@@ -4,4 +4,4 @@ members = [
     "crates/arkhe-core",
     "crates/arkhe-provenance-mcp",
     "crates/arkhe-attestation"
-]
+, "crates/arkhe-finance"]
