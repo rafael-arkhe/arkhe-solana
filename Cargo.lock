@@ -117,6 +117,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "arkhe-finance"
+version = "0.1.0"
+
+[[package]]
 name = "arkhe-provenance-mcp"
 version = "0.2.0"
 dependencies = [
