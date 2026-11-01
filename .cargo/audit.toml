@@ -9,4 +9,10 @@ ignore = [
     # Safe to ignore for now because our usage of tokio doesn't rely on raw FDs
     # passing across thread boundaries in an unsafe manner.
     "RUSTSEC-2026-0386",
+
+    # h2 unbounded empty DATA frames
+    "RUSTSEC-2026-0258",
+
+    # Marvin Attack: potential key recovery through timing sidechannels
+    "RUSTSEC-2023-0071",
 ]
