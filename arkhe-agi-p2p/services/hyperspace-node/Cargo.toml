@@ -1,0 +1,12 @@
+[package]
+name = "hyperspace-node"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+arkhe-core = { path = "../../crates/common/arkhe-core" }
+arkhe-hyperspace-sdk = { path = "../../crates/l1-distribution/arkhe-hyperspace-sdk" }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

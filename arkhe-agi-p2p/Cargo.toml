@@ -1,0 +1,41 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/common/arkhe-core",
+    "crates/common/arkhe-crypto",
+    "crates/common/arkhe-test-utils",
+    "crates/l1-distribution/arkhe-omninode-client",
+    "crates/l1-distribution/arkhe-hyperspace-sdk",
+    "crates/l1-distribution/arkhe-petals-adapter",
+    "crates/l2-provenance/arkhe-spice",
+    "crates/l2-provenance/arkhe-afir",
+    "crates/l2-provenance/arkhe-inference-router",
+    "crates/l3-evidence/arkhe-mobile-wer",
+    "crates/l3-evidence/arkhe-mobile-mmr",
+    "crates/l3-evidence/arkhe-mobile-verify",
+    "crates/l4-governance/arkhe-openclaw",
+    "crates/l4-governance/arkhe-ann-spec",
+    "services/omninode",
+    "services/hyperspace-node",
+    "mobile/native",
+    "tests",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["Arkhe Project Contributors"]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+blake3 = { version = "1.5" }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+rand = "0.8"
+thiserror = "1.0"
+hex = "0.4"
+cbor4ii = { version = "0.3", features = ["serde1", "use_std"] }
+tokio = { version = "1.38", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+sha2 = "0.10"

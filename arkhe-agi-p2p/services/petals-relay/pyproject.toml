@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "petals-relay"
+version = "0.1.0"
+description = "Petals relay server for layer fallback in Arkhe AGI-P2P"
+authors = [{ name = "Arkhe Project Contributors" }]
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0"
+]

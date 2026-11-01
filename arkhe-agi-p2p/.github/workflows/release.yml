@@ -1,0 +1,17 @@
+name: Hybrid Release & SLSA Provenance
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build Release Binaries
+        run: cargo build --release --workspace
+      - name: Generate Checksums
+        run: sha256sum target/release/* > SHA256SUMS.txt || true

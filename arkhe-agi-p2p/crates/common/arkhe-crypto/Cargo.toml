@@ -1,0 +1,15 @@
+[package]
+name = "arkhe-crypto"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+arkhe-core = { path = "../arkhe-core" }
+serde = { workspace = true }
+blake3 = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }
+thiserror = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }

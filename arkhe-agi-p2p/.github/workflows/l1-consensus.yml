@@ -1,0 +1,18 @@
+name: L1 Consensus & Distribution Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'crates/l1-distribution/**'
+      - 'services/omninode/**'
+      - 'services/hyperspace-node/**'
+
+jobs:
+  test-l1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test -p arkhe-omninode-client -p arkhe-hyperspace-sdk -p arkhe-petals-adapter

@@ -1,0 +1,27 @@
+[package]
+name = "arkhe-e2e-tests"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+arkhe-core = { path = "../crates/common/arkhe-core" }
+arkhe-crypto = { path = "../crates/common/arkhe-crypto" }
+arkhe-omninode-client = { path = "../crates/l1-distribution/arkhe-omninode-client" }
+arkhe-hyperspace-sdk = { path = "../crates/l1-distribution/arkhe-hyperspace-sdk" }
+arkhe-petals-adapter = { path = "../crates/l1-distribution/arkhe-petals-adapter" }
+arkhe-spice = { path = "../crates/l2-provenance/arkhe-spice" }
+arkhe-afir = { path = "../crates/l2-provenance/arkhe-afir" }
+arkhe-inference-router = { path = "../crates/l2-provenance/arkhe-inference-router" }
+arkhe-mobile-wer = { path = "../crates/l3-evidence/arkhe-mobile-wer" }
+arkhe-mobile-mmr = { path = "../crates/l3-evidence/arkhe-mobile-mmr" }
+arkhe-mobile-verify = { path = "../crates/l3-evidence/arkhe-mobile-verify" }
+arkhe-openclaw = { path = "../crates/l4-governance/arkhe-openclaw" }
+arkhe-ann-spec = { path = "../crates/l4-governance/arkhe-ann-spec" }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

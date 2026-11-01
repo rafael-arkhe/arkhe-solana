@@ -1,0 +1,16 @@
+name: L2 Provenance Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'crates/l2-provenance/**'
+
+jobs:
+  test-l2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test -p arkhe-spice -p arkhe-afir -p arkhe-inference-router

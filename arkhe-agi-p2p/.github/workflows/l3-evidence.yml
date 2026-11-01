@@ -1,0 +1,16 @@
+name: L3 Evidence Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'crates/l3-evidence/**'
+
+jobs:
+  test-l3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test -p arkhe-mobile-wer -p arkhe-mobile-mmr -p arkhe-mobile-verify

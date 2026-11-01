@@ -1,0 +1,15 @@
+[package]
+name = "arkhe-mobile-native"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+arkhe-core = { path = "../../crates/common/arkhe-core" }
+arkhe-mobile-wer = { path = "../../crates/l3-evidence/arkhe-mobile-wer" }
+arkhe-mobile-mmr = { path = "../../crates/l3-evidence/arkhe-mobile-mmr" }
+arkhe-mobile-verify = { path = "../../crates/l3-evidence/arkhe-mobile-verify" }
+jni = "0.21"
