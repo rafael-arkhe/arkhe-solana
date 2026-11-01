@@ -1,0 +1,121 @@
+{
+  "schema_version": "arkhe-t0-v1",
+  "t0_date": "2026-10-31T00:00:00Z",
+  "scope": {
+    "normative": [
+      "specs/",
+      "criteria/",
+      "method/"
+    ],
+    "descriptive": [
+      "CHANGELOG.md",
+      "golden_vectors/"
+    ],
+    "excluded": [
+      "implementations/",
+      "executions/"
+    ]
+  },
+  "hash_algorithm": "sha256-hex-lowercase",
+  "artifacts": [
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "2cf49ac0fe1a59a669713ebfc59c60c71fc57e475a081455bbc189b0bd6514b1"
+    },
+    {
+      "path": "README.md",
+      "sha256": "a81f893e82e78f69326dd2df83dd954a89385334f120fb21da4741291f24240c"
+    },
+    {
+      "path": "criteria/inv-bb.json",
+      "sha256": "8f69fbd55262f9f275ddaccda4018060c2b03b212af4aa95b85e7180b84bf49f"
+    },
+    {
+      "path": "criteria/l13.json",
+      "sha256": "4547c3b609cdb4626b2a9c203c9e28a81516dda52b31a248914bbac607cbff81"
+    },
+    {
+      "path": "criteria/meta-verify.json",
+      "sha256": "4a91b6f146b35542b0cd252364dda0028d202d548eb1c3e2038bb0e847ee3ca2"
+    },
+    {
+      "path": "golden_vectors/manifest.json",
+      "sha256": "ad8cbbc684d80f5d6c235e8732dfb2fbf0a682286ca61a086952e99d01eb51da"
+    },
+    {
+      "path": "method/falsifier-discipline.md",
+      "sha256": "8c38a2da914c91cae9181c7514d0a30c2c909cc5a759fa5d67155481d61e0659"
+    },
+    {
+      "path": "method/t0-discipline.md",
+      "sha256": "a22345d7efb94df55b47273c4f999ae0f66fe38bdc8fcd69a9264b3abc181ad2"
+    },
+    {
+      "path": "method/tau.md",
+      "sha256": "53181c3e192c28f13a12496a02937ab930e522f0408a3ca76f77896259d45c13"
+    },
+    {
+      "path": "non-claims.md",
+      "sha256": "ee537cd9b53eb8581c1fb3ad2326bf1fb4afb139ff502234e33ffb2d4c952f83"
+    },
+    {
+      "path": "specs/AKG-L13-0001-v0.3.md",
+      "sha256": "da786d4ef1c72b4c86c81474f127831da9299b7e088687e6aac39dfe64e7edc5"
+    },
+    {
+      "path": "specs/AKG-META-0001-v0.2.md",
+      "sha256": "f9c77ed7e0241e05233a796e5230d02ad8ee6db3442176b210380a7f4358a07c"
+    },
+    {
+      "path": "specs/AKG-META-0002-v0.2.md",
+      "sha256": "c5fb3dd665f90d1967389efc50da32cf56b5e96930cc6ae137e5d03219e24e99"
+    },
+    {
+      "path": "specs/arkhe-b-order-spec-v0.2.md",
+      "sha256": "118baad497beb8f9fdd7a07d908598ea3c77821149299b9541e782b4303342d1"
+    },
+    {
+      "path": "specs/arkhe-b-test-suite-v0.2.md",
+      "sha256": "5da86b0db1cfd8113e49de76205c519b4b7ea48734063ac03a29b708b33836bc"
+    },
+    {
+      "path": "specs/inv-bb-28.md",
+      "sha256": "ed50e6752e952259620c22857aed71713570f5f9fd2d419e161cde63f1715344"
+    }
+  ],
+  "claims": [
+    {
+      "id": "T0-C-001",
+      "text": "IntentBinding exige serialização canónica e comparação campo a campo; digest isolado é insuficiente.",
+      "tau": "LEMMA",
+      "evidence": "specs/AKG-META-0001-v0.2.md §2; Arkhe-B Order Spec §5",
+      "falsifier": "alterar amount_cents e recalcular o digest; o gate deve rejeitar"
+    },
+    {
+      "id": "T0-C-002",
+      "text": "Canonicalidade total de Ed25519 exige cinco verificações (S, A, R, small-order, cofactorless).",
+      "tau": "LEMMA",
+      "evidence": "RFC 8032; specs/arkhe-b-order-spec-v0.2.md §5",
+      "falsifier": "small_order_A_rejected; torsion_component_R_rejected"
+    }
+  ],
+  "non_claims": [
+    "T0 não afirma que o Arkhe está implementado.",
+    "T0 não afirma prioridade sobre a ideia de 'verificação de execução de IA'.",
+    "T0 não afirma que os 28 INV-BB cobrem todas as classes de falha.",
+    "T0 não afirma que os falsificadores foram executados."
+  ],
+  "provenance": {
+    "changelog": "CHANGELOG.md",
+    "refuted_versions_included": true
+  },
+  "signatures": {
+    "git_commit": "<hash>",
+    "sigstore_bundle": "T0.json.bundle"
+  },
+  "amendment_policy": {
+    "t0_immutable": true,
+    "new_t0_requires": "T1 com novo T0.json e nova assinatura",
+    "old_t0_stays_public": true
+  }
+}
