@@ -1,0 +1,17 @@
+# reprotest-allowlist.toml
+# Pacotes que falham reprotest por razões documentadas.
+# Qualquer pacote fora desta lista que falhe reprotest BLOQUEIA a release.
+
+[[package]]
+name = "arkhe-pix"
+reason = "Timestamp embutido no binário; aguarda patch upstream"
+deadline = "2026-12-31"
+issue = "ARKHE-123"
+owner = "boot-team"
+
+[[package]]
+name = "arkhe-gguf"
+reason = "Ordem de inode não determinística no parser GGUF"
+deadline = "2027-01-15"
+issue = "ARKHE-124"
+owner = "verify-team"

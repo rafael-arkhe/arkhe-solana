@@ -1,0 +1,218 @@
+# .github/workflows/reprotest.yml
+
+name: ArkheOS CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  # SOURCE_DATE_EPOCH é derivado do commit (reprodutibilidade)
+  SOURCE_DATE_EPOCH: ${{ github.event.repository.pushed_at || github.event.pull_request.updated_at }}
+  DEBIAN_SNAPSHOT: "20261031T000000Z"
+  IMAGE_NAME: "ghcr.io/arkhe-os/arkhe"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Build da imagem bootc (reprodutível)
+  # ---------------------------------------------------------------------------
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Derive SOURCE_DATE_EPOCH from git
+        id: epoch
+        run: |
+          EPOCH=$(git log -1 --format=%ct)
+          echo "epoch=$EPOCH" >> "$GITHUB_OUTPUT"
+          echo "SOURCE_DATE_EPOCH=$EPOCH" >> "$GITHUB_ENV"
+
+      - name: Build bootc image (composefs + sealed UKI)
+        run: |
+          podman build \
+            --build-arg SOURCE_DATE_EPOCH=${{ steps.epoch.outputs.epoch }} \
+            --build-arg DEBIAN_SNAPSHOT=${{ env.DEBIAN_SNAPSHOT }} \
+            --tag ${{ env.IMAGE_NAME }}:ci-${{ github.sha }} \
+            --file Containerfile \
+            .
+          podman save \
+            --format oci-archive \
+            ${{ env.IMAGE_NAME }}:ci-${{ github.sha }} \
+            --output /tmp/arkhe-os.oci
+
+      - name: Upload OCI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arkhe-os-oci
+          path: /tmp/arkhe-os.oci
+
+  # ---------------------------------------------------------------------------
+  # 2. Build B (ambiente mutado — para diffoscope)
+  # ---------------------------------------------------------------------------
+  build-b:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mutate environment (timezone, hostname, user)
+        run: |
+          sudo hostnamectl set-hostname mutated-builder
+          echo "TZ=America/Sao_Paulo" | sudo tee -a /etc/environment
+          sudo useradd -m builder-b || true
+
+      - name: Build bootc image (B)
+        run: |
+          EPOCH=$(git log -1 --format=%ct)
+          podman build \
+            --build-arg SOURCE_DATE_EPOCH=$EPOCH \
+            --build-arg DEBIAN_SNAPSHOT=${{ env.DEBIAN_SNAPSHOT }} \
+            --tag ${{ env.IMAGE_NAME }}:ci-b-${{ github.sha }} \
+            --file Containerfile \
+            .
+          podman save \
+            --format oci-archive \
+            ${{ env.IMAGE_NAME }}:ci-b-${{ github.sha }} \
+            --output /tmp/arkhe-os-b.oci
+
+      - name: Upload OCI artifact B
+        uses: actions/upload-artifact@v4
+        with:
+          name: arkhe-os-oci-b
+          path: /tmp/arkhe-os-b.oci
+
+  # ---------------------------------------------------------------------------
+  # 3. Diffoscope: compara build A vs build B
+  # ---------------------------------------------------------------------------
+  reproducible-check:
+    needs: [build, build-b]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: arkhe-os-oci
+          path: /tmp/a
+      - uses: actions/download-artifact@v4
+        with:
+          name: arkhe-os-oci-b
+          path: /tmp/b
+
+      - name: Install diffoscope
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y diffoscope
+
+      - name: Compare OCI archives
+        run: |
+          set +e
+          diffoscope /tmp/a/arkhe-os.oci /tmp/b/arkhe-os-b.oci \
+            > diffoscope-report.html
+          EXIT_CODE=$?
+          set -e
+          if [ "$EXIT_CODE" -ne 0 ]; then
+            echo "::error::Reproducibility failure. See diffoscope-report.html"
+            false
+          fi
+          echo "Reproducible: PASS"
+
+      - name: Upload diffoscope report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diffoscope-report
+          path: diffoscope-report.html
+
+  # ---------------------------------------------------------------------------
+  # 4. Boot test em QEMU (composefs backend)
+  # ---------------------------------------------------------------------------
+  boot-test:
+    needs: [build]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: arkhe-os-oci
+          path: /tmp/oci
+
+      - name: Install QEMU + bootc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils ovmf
+          cargo install bootc
+
+      - name: Install to-disk (composefs backend)
+        run: |
+          truncate -s 4G /tmp/disk.img
+          sudo bootc install to-disk \
+            --composefs-backend \
+            --bootloader systemd \
+            --filesystem ext4 \
+            --target /tmp/disk.img \
+            oci-archive:/tmp/oci/arkhe-os.oci
+
+      - name: Boot with QEMU + UEFI
+        run: |
+          timeout 300 qemu-system-x86_64 \
+            -m 2048 \
+            -drive if=virtio,file=/tmp/disk.img,format=raw \
+            -bios /usr/share/OVMF/OVMF_CODE.fd \
+            -nographic \
+            -serial mon:stdio \
+            || true
+          # Verifica se o boot chegou a multi-user.target
+          grep -q "Reached target Multi-User System" /tmp/boot.log
+
+      - name: Upload boot log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boot-log
+          path: /tmp/boot.log
+
+  # ---------------------------------------------------------------------------
+  # 5. reprotest por pacote (allowlist)
+  # ---------------------------------------------------------------------------
+  reprotest:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        package: [arkhe-pix, arkhe-gguf, arkhe-kya, arkhe-jobs]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install reprotest + diffoscope + schroot + sbuild
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y reprotest diffoscope debuild schroot sbuild debootstrap
+
+      - name: Setup chroot environment
+        run: |
+          sudo sbuild-createchroot trixie /srv/chroot/trixie-amd64-sbuild http://deb.debian.org/debian
+          sudo sbuild-adduser $USER
+
+      - name: Run reprotest
+        run: |
+          cd packages/${{ matrix.package }}
+          reprotest \
+            --variations=timezone,umask,hostname,user_group,fileordering \
+            'dpkg-buildpackage -b -uc -us' \
+            '../*.deb' \
+            -- schroot trixie-amd64-sbuild
+
+      - name: Upload diffoscope on failure
+        if: failure()
+        run: |
+          diffoscope ../*.deb > diffoscope-${{ matrix.package }}.html || true
+        continue-on-error: true
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diffoscope-${{ matrix.package }}
+          path: diffoscope-${{ matrix.package }}.html
