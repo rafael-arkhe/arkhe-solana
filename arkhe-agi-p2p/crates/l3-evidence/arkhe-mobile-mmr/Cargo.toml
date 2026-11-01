@@ -1,0 +1,19 @@
+[package]
+name = "arkhe-mobile-mmr"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+arkhe-core = { path = "../../common/arkhe-core" }
+arkhe-crypto = { path = "../../common/arkhe-crypto" }
+arkhe-mobile-wer = { path = "../arkhe-mobile-wer" }
+ed25519-dalek = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+blake3 = { workspace = true }
+thiserror = { workspace = true }
+hex = { workspace = true }
+
+[dev-dependencies]
+rand = { workspace = true }

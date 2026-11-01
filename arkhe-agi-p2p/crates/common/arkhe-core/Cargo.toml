@@ -1,0 +1,14 @@
+[package]
+name = "arkhe-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+blake3 = { workspace = true }
+thiserror = { workspace = true }
+hex = { workspace = true }
+cbor4ii = { version = "0.3", features = ["serde1", "use_std"] }
+sha2 = { workspace = true }

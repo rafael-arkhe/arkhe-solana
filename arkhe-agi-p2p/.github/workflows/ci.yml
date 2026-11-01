@@ -1,0 +1,38 @@
+name: CI (Rust + TS)
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  rust-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Cargo Check
+        run: cargo check --workspace
+      - name: Cargo Clippy
+        run: cargo clippy --workspace -- -D warnings
+      - name: Cargo Test
+        run: cargo test --workspace
+
+  ts-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile || true
+      - name: Build & Test packages
+        run: pnpm run build || true

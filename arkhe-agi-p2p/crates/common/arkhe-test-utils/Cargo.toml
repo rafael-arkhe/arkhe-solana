@@ -1,0 +1,13 @@
+[package]
+name = "arkhe-test-utils"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+arkhe-core = { path = "../arkhe-core" }
+arkhe-crypto = { path = "../arkhe-crypto" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+rand = { workspace = true }
+ed25519-dalek = { workspace = true }

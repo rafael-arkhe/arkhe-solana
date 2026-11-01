@@ -1,0 +1,4 @@
+* @arkhe-core-maintainers
+/crates/l3-evidence/ @arkhe-mobile-security
+/crates/l2-provenance/ @arkhe-cryptography
+/contracts/ @arkhe-smart-contracts

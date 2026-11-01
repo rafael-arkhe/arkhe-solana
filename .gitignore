@@ -15,3 +15,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+target/
+arkhe-agi-p2p/target/
+**/target/
+node_modules/
+**/node_modules/
