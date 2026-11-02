@@ -1,0 +1,12 @@
+{
+  "description": "AFiR Falsifier Vector - Output digest tampered, signature mismatch",
+  "invariants": ["I-03", "I-T02", "I-T08"],
+  "version": 1,
+  "session_id": "0000000000000000000000000000000000000000000000000000000000000001",
+  "step_index": 0,
+  "input_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+  "output_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "model_cid": "bafk01551e20deadbeef0000000000000000000000000000000000000000000000000000",
+  "execution_timestamp": 1712000000,
+  "expected_outcome": "REJECT"
+}

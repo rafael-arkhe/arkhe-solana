@@ -1,0 +1,34 @@
+# arkhe-test Release Strategy Policy
+# Invariantes I-T01, I-T02, I-T04, I-T07
+
+version = 1
+name = "Arkhe Release Gate Policy"
+
+[hermetic_build]
+deterministic = true
+sbom_required = true
+slsa_provenance_level = 3
+fail_on_warnings = true
+
+[pipeline_gates]
+unit_feedback_target_seconds = 300       # < 5 minutos
+invariant_coverage_target_percent = 100 # 100% dos I-01 a I-10
+max_false_positive_rate_percent = 2.0
+allowed_warnings = 0                    # I-T02: Sem "warning aceitável" em segurança
+
+[canary]
+enabled = true
+traffic_percentage = 5                  # 1-5% dos nós
+bake_time_minutes = 60
+target_success_rate = 99.5
+
+[staged_rollout]
+stages = [10, 25, 50, 100]
+step_delay_minutes = 30
+
+[auto_halt_triggers]
+halt_on_mmr_divergence = true           # MMR divergence != 0 -> halt imediato
+halt_on_invalid_receipt_accepted = true # Recibo inválido aceito -> halt imediato
+halt_on_corrupt_chunk_accepted = true   # Chunk corrompido aceito -> halt imediato
+halt_on_security_test_failure = true
+max_slashing_spike_percent = 0.5

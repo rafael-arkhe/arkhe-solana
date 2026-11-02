@@ -1,0 +1,8 @@
+{
+  "description": "Distributed Hybrid Checkpoint Vector - StrongBox ML-DSA-65 and TEE Ed25519",
+  "invariants": ["I-05", "I-06", "I-T04"],
+  "mmr_size": 3,
+  "timestamp": 1712000050,
+  "hardware": "Titan M2 / StrongBox",
+  "expected_outcome": "PASS"
+}

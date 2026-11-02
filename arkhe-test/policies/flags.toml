@@ -1,0 +1,25 @@
+# arkhe-test Feature Flags Policy
+# Invariante I-T06: Feature flags podem ativar funcionalidades, nunca desativar verificação obrigatória.
+# Regra formal: flag not in {signature_check, hash_check, mmr_append_only, role_separation}
+
+version = 1
+description = "Políticas de restrição estrita de feature flags do ecossistema Arkhe"
+
+[allowed_flags]
+"network.experimental_transport" = { allows = "Transporte de rede alternativo (ex.: QUIC/WebRTC)", prohibits = "Desativação de validação de chunk" }
+"moe.receipt_tree" = { allows = "Ativação de agregação de receipt tree MoE", prohibits = "Desativação de assinatura nos recibos" }
+"audit.bundle_v2" = { allows = "Migração de formato do bundle de auditoria", prohibits = "Violação do append-only da MMR" }
+"cal.anchor_batching" = { allows = "Frequência dinâmica de lotes de ancoragem", prohibits = "Enfraquecimento da validade offline da evidência" }
+"inference.zk_sampling" = { allows = "Taxa de amostragem probabilística ZKML", prohibits = "Omissão da verificação mínima obrigatória" }
+"mcp.action_tools" = { allows = "Exposição de ferramentas de escrita no servidor MCP", prohibits = "Execução sem mandato assinado" }
+"governance.proposals" = { allows = "Criação de propostas de auto-melhoria por agentes", prohibits = "Canonificação automática sem homologação humana" }
+
+[prohibited_flag_categories]
+categories = [
+    "signature_check",
+    "hash_check",
+    "mmr_append_only",
+    "role_separation",
+    "hardware_attestation_bypass",
+    "fail_closed_override"
+]

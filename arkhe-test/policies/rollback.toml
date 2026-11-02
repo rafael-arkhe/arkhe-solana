@@ -1,0 +1,27 @@
+# arkhe-test Rollback Safety Policy
+# Invariante I-T05: Rollback seguro nunca corrompe ou reescreve MMR, recibos ou checkpoints.
+# Regra formal: rollback => evidência existente 100% intacta.
+
+version = 1
+name = "Arkhe Safe Rollback Policy"
+
+[scope]
+allowed_targets = ["binary_code", "configuration", "feature_flags"]
+prohibited_targets = [
+    "mmr_accumulator",
+    "afir_receipts_ledger",
+    "signed_checkpoints",
+    "titan_m2_attestation_history"
+]
+
+[rules]
+target_rollback_duration_minutes = 10
+rewrite_mmr_permitted = false
+delete_receipts_permitted = false
+purge_checkpoints_permitted = false
+
+# Se a nova versão criou evidência válida, a versão anterior deve ser capaz de lê-la ou preservá-la
+backward_evidence_compatibility_required = true
+
+# Se houver incompatibilidade de formato, cria-se migração append-only, nunca deleção ou truncamento
+incompatibility_resolution = "append_only_migration"

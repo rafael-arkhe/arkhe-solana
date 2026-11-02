@@ -1,0 +1,8 @@
+{
+  "description": "Fraud Proof Falsifier Vector - Slashed rogue worker attempting double validation",
+  "invariants": ["I-08", "I-10", "I-T02", "I-T08"],
+  "epoch": 42,
+  "worker_id": "worker_0x_malicious",
+  "equivocating_votes": 2,
+  "expected_outcome": "SLASH_AND_BLOCK"
+}
