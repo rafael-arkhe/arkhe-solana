@@ -1,14 +1,13 @@
-use arkhe_afir::AfirSigner;
-use arkhe_core::Digest32;
-use arkhe_crypto::MlDsa65Keypair;
-use arkhe_mobile_mmr::{HardwareStrongBox, LocalMmr, SignedCheckpoint};
-use arkhe_mobile_verify::{OfflineVerificationBundle, OfflineVerifier};
-use arkhe_mobile_wer::{MobileAction, MobileWER, TitanM2Binding};
-use ed25519_dalek::SigningKey;
-use rand::rngs::OsRng;
-
 #[test]
 fn test_complete_offline_verification_and_falsifiers() {
+    use arkhe_afir::AfirSigner;
+    use arkhe_core::Digest32;
+    use arkhe_crypto::MlDsa65Keypair;
+    use arkhe_mobile_mmr::{HardwareStrongBox, LocalMmr, SignedCheckpoint};
+    use arkhe_mobile_verify::{OfflineVerificationBundle, OfflineVerifier};
+    use arkhe_mobile_wer::{MobileAction, MobileWER, TitanM2Binding};
+    use ed25519_dalek::SigningKey;
+    use rand::rngs::OsRng;
     let quote = b"titan_m2_hardware_measured_boot_quote";
     let nonce = [101u8; 32];
     let app_measurement = [77u8; 32];
