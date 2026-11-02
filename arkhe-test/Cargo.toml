@@ -1,0 +1,31 @@
+[package]
+name = "arkhe-test"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["Arkhe Project Contributors"]
+
+[workspace]
+
+[dependencies]
+arkhe-core = { path = "../arkhe-agi-p2p/crates/common/arkhe-core" }
+arkhe-crypto = { path = "../arkhe-agi-p2p/crates/common/arkhe-crypto" }
+arkhe-test-utils = { path = "../arkhe-agi-p2p/crates/common/arkhe-test-utils" }
+arkhe-omninode-client = { path = "../arkhe-agi-p2p/crates/l1-distribution/arkhe-omninode-client" }
+arkhe-hyperspace-sdk = { path = "../arkhe-agi-p2p/crates/l1-distribution/arkhe-hyperspace-sdk" }
+arkhe-petals-adapter = { path = "../arkhe-agi-p2p/crates/l1-distribution/arkhe-petals-adapter" }
+arkhe-spice = { path = "../arkhe-agi-p2p/crates/l2-provenance/arkhe-spice" }
+arkhe-afir = { path = "../arkhe-agi-p2p/crates/l2-provenance/arkhe-afir" }
+arkhe-inference-router = { path = "../arkhe-agi-p2p/crates/l2-provenance/arkhe-inference-router" }
+arkhe-mobile-wer = { path = "../arkhe-agi-p2p/crates/l3-evidence/arkhe-mobile-wer" }
+arkhe-mobile-mmr = { path = "../arkhe-agi-p2p/crates/l3-evidence/arkhe-mobile-mmr" }
+arkhe-mobile-verify = { path = "../arkhe-agi-p2p/crates/l3-evidence/arkhe-mobile-verify" }
+arkhe-openclaw = { path = "../arkhe-agi-p2p/crates/l4-governance/arkhe-openclaw" }
+arkhe-ann-spec = { path = "../arkhe-agi-p2p/crates/l4-governance/arkhe-ann-spec" }
+blake3 = { version = "1.5" }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+rand = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+thiserror = "1.0"

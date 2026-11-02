@@ -1,0 +1,10 @@
+{
+  "description": "Arkhe MMR Profile v1 - 3 leaves, Right-to-Left peak bagging with size prefix",
+  "invariants": ["I-04", "I-T04"],
+  "leaves": [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  ],
+  "expected_outcome": "PASS"
+}

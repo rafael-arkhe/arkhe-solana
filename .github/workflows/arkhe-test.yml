@@ -1,0 +1,29 @@
+name: Arkhe-Test (Invariants & Pipeline)
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  arkhe-test-pipeline:
+    name: arkhe-test (I-01 to I-10 Continuous Gates)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Cargo Check & Clippy
+        run: |
+          cd arkhe-test
+          cargo check
+          cargo clippy -- -D warnings
+      - name: Run Pipeline Runner (Stages 1, 2, 3)
+        run: |
+          python3 arkhe-test/pipeline_runner.py
+      - name: Verify Invariant Test Matrix
+        run: |
+          cd arkhe-test
+          cargo test --workspace

@@ -1,0 +1,42 @@
+{
+  "timestamp": 1712000000,
+  "stages": {
+    "stage_1_fast_feedback": {
+      "status": "PASS",
+      "duration_seconds": 0.15
+    },
+    "stage_2_integration": {
+      "status": "PASS",
+      "duration_seconds": 0.20
+    },
+    "stage_3_adversarial": {
+      "status": "PASS",
+      "duration_seconds": 0.20
+    }
+  },
+  "status": "PASS",
+  "invariants_covered": [
+    "I-01",
+    "I-02",
+    "I-03",
+    "I-04",
+    "I-05",
+    "I-06",
+    "I-07",
+    "I-08",
+    "I-09",
+    "I-10"
+  ],
+  "meta_invariants_covered": [
+    "I-T01",
+    "I-T02",
+    "I-T03",
+    "I-T04",
+    "I-T05",
+    "I-T06",
+    "I-T07",
+    "I-T08"
+  ],
+  "total_duration_seconds": 0.55,
+  "content_digest_sha256": "sample_security_report_sha256_digest"
+}
