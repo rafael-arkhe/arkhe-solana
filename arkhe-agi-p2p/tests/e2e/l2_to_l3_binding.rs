@@ -1,10 +1,9 @@
-use arkhe_afir::AfirSigner;
-use arkhe_core::Digest32;
-use arkhe_crypto::MlDsa65Keypair;
-use arkhe_mobile_wer::{MobileAction, MobileWER, TitanM2Binding};
-
 #[test]
 fn test_l2_to_l3_binding() {
+    use arkhe_afir::AfirSigner;
+    use arkhe_core::Digest32;
+    use arkhe_crypto::MlDsa65Keypair;
+    use arkhe_mobile_wer::{MobileAction, MobileWER, TitanM2Binding};
     // 1. L2 produces an AFiR receipt
     let afir_keys = MlDsa65Keypair::generate_deterministic(b"l2-l3-afir-seed");
     let signer = AfirSigner::new(&afir_keys);

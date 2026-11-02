@@ -10,6 +10,12 @@ pub const DOMAIN_MMR_LEAF: u8 = 0x00;
 pub const DOMAIN_MMR_NODE: u8 = 0x01;
 pub const DOMAIN_MMR_ROOT: u8 = 0x02;
 
+pub mod file_types;
+pub use file_types::{
+    classify_file, is_extension_prohibited, is_extension_restricted, validate_arkhe_file,
+    ArkheFileType, ArkheLayer, ExtensionStatus,
+};
+
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
 pub struct Digest32(#[serde(with = "hex_serde")] pub [u8; 32]);
 

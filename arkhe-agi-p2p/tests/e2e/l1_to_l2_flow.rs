@@ -1,11 +1,10 @@
-use arkhe_afir::{AfirSigner, AfirVerifier};
-use arkhe_core::Digest32;
-use arkhe_crypto::MlDsa65Keypair;
-use arkhe_omninode_client::{CidV1, WeightChunker};
-use arkhe_spice::{InferenceChain, InferenceHopEntry};
-
 #[test]
 fn test_l1_to_l2_flow() {
+    use arkhe_afir::{AfirSigner, AfirVerifier};
+    use arkhe_core::Digest32;
+    use arkhe_crypto::MlDsa65Keypair;
+    use arkhe_omninode_client::WeightChunker;
+    use arkhe_spice::{InferenceChain, InferenceHopEntry};
     // 1. L1: Chunker processes transformer weights and obtains CIDv1
     let weight_bytes = b"sample_transformer_layer_0_weights".to_vec();
     let chunks = WeightChunker::chunk_tensor_blocks(vec![
