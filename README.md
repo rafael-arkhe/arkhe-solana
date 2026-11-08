@@ -55,4 +55,4 @@ We welcome contributions! Please follow these guidelines:
 1.  **Formatting**: Ensure your code is properly formatted by running `cargo fmt`.
 2.  **Testing**: Verify the test suite passes by running `cargo test`.
     *   **Note on `arkhe-c2pa-bridge`**: This crate has known upstream dependency resolution conflicts with `rasn` and `bs58` (via `c2pa` and `anchor-lang`). When running workspace-wide tests, it may require isolation via `default-members` in the root `Cargo.toml` or testing individually via `cargo test -p arkhe-c2pa-bridge`.
-3.  **Pull Requests**: Create a branch from `main`, add tests for your code, and submit your pull request. Contributions are made under the MIT Software License.
+3.  **Pull Requests**: Create a branch from `main`, add tests for your code, and submit your pull request. Contributions are made under the GNU Affero General Public License version 3.

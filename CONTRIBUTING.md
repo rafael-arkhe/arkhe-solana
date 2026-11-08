@@ -10,5 +10,5 @@ We love your input! We want to make contributing to Arkhe as easy and transparen
 4. Make sure your code is properly formatted by running `cargo fmt`.
 5. Submit your pull request!
 
-## Any contributions you make will be under the MIT Software License
-In short, when you submit code changes, your contributions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project. Feel free to contact the maintainers if that's a concern.
+## Any contributions you make will be under the GNU Affero General Public License version 3
+In short, when you submit code changes, your contributions are understood to be under the same AGPLv3 that covers the project. Feel free to contact the maintainers if that's a concern.
